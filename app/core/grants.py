@@ -157,7 +157,7 @@ class GrantService:
         raw = token[:MAX_TOKEN_BYTES].encode('utf-8', errors='replace')
         append_receipt(session,tenant_id=claims.tid if claims else None,actor_id=claims.sub if claims else None,grant_jti=claims.jti if claims else None,id=receipt_id, timestamp=int(time.time()), allowed=allowed,
                             reason=reason, rule_id='grant.' + reason.lower(),
-                            policy_version=self.settings.policy_version,
+                            policy_version=session.info.get('effective_policy_version',self.settings.policy_version),
                             input_hash=hashlib.sha256(raw).hexdigest(),
                             action_digest=claims.act_digest.removeprefix('sha256:') if claims else None,
                             request_id=claims.jti if claims else None, refund_id=None)

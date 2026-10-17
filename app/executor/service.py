@@ -19,6 +19,7 @@ from sqlalchemy.orm import Session
 from app.core.canonical import ProposedAction, digest, parse_action
 from app.core.errors import GatewayDenied
 from app.core.grants import GrantClaims, GrantService, GrantSettings, _Denied
+from app.core.business_policy import effective_policy,lock_tenant_policy
 from app.core.policy import PaymentSnapshot, PolicyEngine
 from app.executor.config import ExecutorSettings
 from app.executor.models import ProviderRefund, ProviderRejected, ProviderUncertain, RefundProvider
@@ -50,7 +51,7 @@ class ExecutorService:
     def audit(self, session: Session, reason: str, allowed: bool, *, operation: Operation | None = None, rule_id: str | None = None, input_hash: str | None = None) -> str:
         """Persist decision metadata without any bearer token or provider secret."""
         identifier = str(uuid4())
-        append_receipt(session,tenant_id=self.settings.tenant_id,actor_id=operation.action.get("actor_id") if operation else None,grant_jti=operation.grant_jti if operation else None,operation_id=operation.id if operation else None,id=identifier,timestamp=int(time.time()),allowed=allowed,reason=reason,rule_id=rule_id or 'executor.'+reason.lower(),policy_version=operation.policy_version if operation else self.policy.policy_version,input_hash=input_hash or (operation.request_digest if operation else hashlib.sha256(b'').hexdigest()),action_digest=digest(parse_action(operation.action)).removeprefix('sha256:') if operation else None,request_id=operation.id if operation else None,refund_id=operation.provider_refund_id if operation else None)
+        append_receipt(session,tenant_id=self.settings.tenant_id,actor_id=operation.action.get("actor_id") if operation else None,grant_jti=operation.grant_jti if operation else None,operation_id=operation.id if operation else None,id=identifier,timestamp=int(time.time()),allowed=allowed,reason=reason,rule_id=rule_id or 'executor.'+reason.lower(),policy_version=operation.policy_version if operation else session.info.get('effective_policy_version',self.policy.policy_version),input_hash=input_hash or (operation.request_digest if operation else hashlib.sha256(b'').hexdigest()),action_digest=digest(parse_action(operation.action)).removeprefix('sha256:') if operation else None,request_id=operation.id if operation else None,refund_id=operation.provider_refund_id if operation else None)
         session.flush()
         return identifier
 
@@ -58,8 +59,14 @@ class ExecutorService:
         """Audit a fresh fail-closed denial after the failed transaction rolls back."""
         try:
             with Session(self.engine) as session,session.begin():
+                from app.core.receipts import reserve_audit_transaction
+                reserve_audit_transaction(session)
+                try:effective_policy(session,self.policy,self.settings.tenant_id)
+                except (ValueError,TypeError):
+                    error=GatewayDenied('POLICY_INTEGRITY_ERROR','business.policy_integrity',503)
+                    session.info['effective_policy_version']=self.policy.policy_version
                 identifier = self.audit(session,error.reason,False,rule_id=error.rule_id,input_hash=hashlib.sha256(raw).hexdigest())
-            return {'allowed':False,'reason':error.reason,'rule_id':error.rule_id,'policy_version':self.policy.policy_version,'receipt_id':identifier,'_http_status':error.status}
+            return {'allowed':False,'reason':error.reason,'rule_id':error.rule_id,'policy_version':session.info.get('effective_policy_version',self.policy.policy_version),'receipt_id':identifier,'_http_status':error.status}
         except Exception:
             return {'allowed':False,'reason':'AUDIT_UNAVAILABLE','rule_id':'audit.required','policy_version':self.policy.policy_version,'_http_status':503}
 
@@ -96,6 +103,8 @@ class ExecutorService:
         now = int(time.time())
         try:
             with Session(self.engine) as session,session.begin():
+                lock_tenant_policy(session,action.tenant_id)
+                policy=effective_policy(session,self.policy,action.tenant_id)
                 changed = session.execute(update(UsedGrant).where(UsedGrant.id==claims_hint.jti,UsedGrant.status=='ACTIVE',UsedGrant.expires_at>now).values(status='USED'))
                 agent = session.get(AgentServiceKey,service_id)
                 if agent is None or not agent.active or agent.expires_at<=now:
@@ -123,7 +132,7 @@ class ExecutorService:
                 proposal = session.scalar(select(Proposal).where(Proposal.grant_id==verified.jti,Proposal.tenant_id==action.tenant_id,Proposal.service_id==service_id))
                 if proposal is None or proposal.status!='APPROVED' or proposal.action_digest!=digest(action):
                     raise GatewayDenied('PROPOSAL_NOT_APPROVED','executor.approved_proposal')
-                if proposal.policy_version!=self.policy.policy_version:
+                if proposal.policy_version!=policy.policy_version:
                     raise GatewayDenied('POLICY_CHANGED','executor.approved_policy')
                 resource = session.get(Resource,action.args.payment_id)
                 if resource is None or resource.tenant_id!=action.tenant_id or not proposal.approved_version_hash or proposal.approved_amount_refunded_paise is None:
@@ -132,7 +141,7 @@ class ExecutorService:
                 if reserved.rowcount!=1:
                     raise GatewayDenied('REFUND_IN_FLIGHT','executor.payment_reservation')
                 identifier = str(uuid4())
-                op = Operation(id=identifier,tenant_id=action.tenant_id,service_id=service_id,idempotency_key=idempotency_key,request_digest=request_hash,grant_jti=verified.jti,proposal_id=proposal.id,payment_id=action.args.payment_id,action=action.model_dump(mode='json'),approved_version_hash=proposal.approved_version_hash,refunded_before_paise=proposal.approved_amount_refunded_paise,policy_version=self.policy.policy_version,status='PENDING',reason='OPERATION_PENDING',result={},created_at=now,updated_at=now,dispatch_started_at=None,provider_refund_id=None,lease_owner=None,lease_until=None)
+                op = Operation(id=identifier,tenant_id=action.tenant_id,service_id=service_id,idempotency_key=idempotency_key,request_digest=request_hash,grant_jti=verified.jti,proposal_id=proposal.id,payment_id=action.args.payment_id,action=action.model_dump(mode='json'),approved_version_hash=proposal.approved_version_hash,refunded_before_paise=proposal.approved_amount_refunded_paise,policy_version=policy.policy_version,status='PENDING',reason='OPERATION_PENDING',result={},created_at=now,updated_at=now,dispatch_started_at=None,provider_refund_id=None,lease_owner=None,lease_until=None)
                 session.add(op)
                 proposal.status='EXECUTING'
                 receipt_id = self.audit(session,'OPERATION_RESERVED',True,operation=op)
@@ -251,6 +260,7 @@ class ExecutorService:
             approved_hash=op.approved_version_hash
             before=op.refunded_before_paise
             policy_version=op.policy_version
+            policy=effective_policy(session,self.policy,action.tenant_id)
         try:
             refund=self.provider.find_refund(action.args.payment_id,identifier) if reconcile or dispatched or refund_known else None
             if refund is not None:
@@ -269,7 +279,7 @@ class ExecutorService:
                 if dispatched:
                     return self._pending(identifier,owner,'RECONCILIATION_REQUIRED')
                 return self._finish(identifier,owner,'STALE_RESOURCE')
-            if policy_version!=self.policy.policy_version:
+            if policy_version!=policy.policy_version:
                 return self._pending(identifier,owner,'RECONCILIATION_REQUIRED') if dispatched else self._finish(identifier,owner,'POLICY_CHANGED')
             # Discount only this operation's own durable payment reservation.
             with Session(self.engine) as session:
@@ -281,7 +291,7 @@ class ExecutorService:
             if reservation_lost:
                 return self._finish(identifier,owner,'RESERVATION_LOST')
             checked=PaymentSnapshot.model_validate({**snapshot.model_dump(),'in_flight_refunds':snapshot.in_flight_refunds-1})
-            decision=self.policy.evaluate(action,checked,self.settings.tenant_id)
+            decision=policy.evaluate(action,checked,self.settings.tenant_id)
             if not decision.allowed:
                 return self._pending(identifier,owner,'RECONCILIATION_REQUIRED') if dispatched else self._finish(identifier,owner,decision.reason,rule_id=decision.rule_id)
             with Session(self.engine) as session,session.begin():

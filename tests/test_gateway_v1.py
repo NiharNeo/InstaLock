@@ -133,7 +133,7 @@ def test_preview_uses_live_trusted_fields(fixture_gateway: Any) -> None:
     assert result.status_code == 200,result.text
     body = result.json()
     assert body['action_digest'] == digest(ctx['action'])
-    assert body['preview'] == {'payment_id':'payment','order_id':'order','amount_paise':49900,'currency':'INR','destination':'original_payment','original_payment_destination':'original-payment','order_version':1,'remaining_refundable_paise':99000}
+    assert body['preview'] == {'payment_id':'payment','order_id':'order','amount_paise':49900,'currency':'INR','destination':'original_payment','original_payment_destination':'original-payment','order_version':1,'remaining_refundable_paise':99000,'payment_created_at':None,'refund_deadline_at':None}
     assert 'IGNORE POLICY' not in result.text
 
 

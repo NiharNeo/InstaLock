@@ -50,7 +50,7 @@ class RazorpayTestAdapter:
     @staticmethod
     def _payment(value: Any) -> ProviderPayment:
         try:
-            return ProviderPayment(provider_id=value['id'],amount_paise=value['amount'],amount_refunded_paise=value['amount_refunded'],currency=value['currency'],status=value['status'])
+            return ProviderPayment(provider_id=value['id'],amount_paise=value['amount'],amount_refunded_paise=value['amount_refunded'],currency=value['currency'],status=value['status'],created_at=value.get('created_at'))
         except Exception:
             raise ProviderUncertain('PROVIDER_INVALID_RESPONSE') from None
 
@@ -122,3 +122,29 @@ class RazorpayTestAdapter:
             if len(value['items'])<100:
                 return list(found.values())
         raise ProviderUncertain('PROVIDER_QUERY_INCOMPLETE')
+
+    def create_order(self, amount_paise: int, receipt: str) -> dict[str,Any]:
+        """Create a real test-mode order using a server-priced persisted basket."""
+        if type(amount_paise) is not int or not 0<amount_paise<=10000000 or not re.fullmatch(r'[a-f0-9]{32}',receipt):
+            raise ValueError('bounded order amount and checkout identifier required')
+        value=self._request('POST','orders',body={'amount':amount_paise,'currency':'INR','receipt':receipt})
+        if type(value) is not dict:raise ProviderUncertain('PROVIDER_INVALID_RESPONSE')
+        return value
+
+    def checkout_payment(self,payment_id: str) -> dict[str,Any]:
+        """Read raw provider order binding in addition to the strict payment projection."""
+        identifier=_PAYMENT_ID.validate_python(payment_id)
+        value=self._request('GET','payments/'+identifier)
+        if type(value) is not dict or value.get('id')!=identifier:raise ProviderUncertain('PROVIDER_INVALID_RESPONSE')
+        self._payment(value)
+        return value
+
+    def order_payments(self,order_id: str) -> list[dict[str,Any]]:
+        """Recover actual captured results when the browser callback is interrupted."""
+        if not re.fullmatch(r'order_[A-Za-z0-9]+',order_id):raise ValueError('invalid order')
+        value=self._request('GET','orders/'+order_id+'/payments')
+        if type(value) is not dict or type(value.get('items')) is not list or value.get('count')!=len(value['items']) or len(value['items'])>100:
+            raise ProviderUncertain('PROVIDER_INVALID_RESPONSE')
+        for payment in value['items']:
+            if type(payment) is not dict or payment.get('order_id')!=order_id:raise ProviderUncertain('PROVIDER_RESOURCE_MISMATCH')
+        return value['items']

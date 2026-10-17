@@ -51,6 +51,16 @@ def serialize_receipt(row: Receipt) -> dict[str,Any]:
     return {**payload(row),'receipt_hash':row.receipt_hash,'signature':row.signature}
 
 
+def reserve_audit_transaction(session: Session) -> None:
+    """Acquire SQLite's writer slot before authentication reads in audited read endpoints.
+
+    This portable zero-row UPDATE changes no receipt. PostgreSQL takes no row lock;
+    SQLite reserves its single writer up front, avoiding read-to-write deadlocks
+    when several browser tabs authenticate and append read-decision receipts.
+    """
+    session.execute(update(ReceiptHead).where(ReceiptHead.scope.is_(None)).values(seq=ReceiptHead.seq))
+
+
 def append_receipt(session: Session, *, tenant_id: str | None = None, actor_id: str | None = None, grant_jti: str | None = None, operation_id: str | None = None, **metadata: Any) -> Receipt:
     """Lock the tenant head and append signed evidence in the caller's transaction.
 

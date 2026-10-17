@@ -64,6 +64,6 @@ def create_ticket(session: Session, body: TicketInput, policy_version: str, *, s
     # Unknown/cross-tenant IDs remain unlinked; do not expose an order-existence oracle.
     order_id=order.id if order is not None and order.tenant_id==channel.tenant_id else None
     identifier=str(uuid4())
-    session.add(Ticket(id=identifier,tenant_id=channel.tenant_id,order_id=order_id,text=body.text,redacted_text=redact(body.text),source_id=source_id,processing_status='QUEUED'))
+    session.add(Ticket(id=identifier,tenant_id=channel.tenant_id,order_id=order_id,text=body.text,redacted_text=redact(body.text),source_id=source_id,processing_status='QUEUED',created_at=int(time.time())))
     row=append_receipt(session,tenant_id=channel.tenant_id,id=str(uuid4()),timestamp=int(time.time()),allowed=True,reason='TICKET_ACCEPTED',rule_id='intake.accept',policy_version=policy_version,input_hash=hashlib.sha256(body.text.encode()).hexdigest(),action_digest=None,request_id=identifier,refund_id=None)
     return {'allowed':True,'reason':'TICKET_ACCEPTED','rule_id':'intake.accept','policy_version':policy_version,'ticket_id':identifier,'receipt_id':row.id}

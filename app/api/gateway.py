@@ -24,7 +24,8 @@ from app.core.grants import GrantIssueError, GrantService, GrantSettings
 from app.core.orchestrator import RefundOrchestrator
 from app.core.keys import load_private_key_for_kid
 from app.core.policy import PaymentSnapshot, PolicyEngine
-from app.core.receipts import append_receipt
+from app.core.business_policy import effective_policy,lock_tenant_policy
+from app.core.receipts import append_receipt,reserve_audit_transaction
 from intentlock.db import ApprovalDispatch, Execution, OperatorSession, Proposal, ProposalPreview, Receipt, UsedGrant
 
 
@@ -60,7 +61,7 @@ class Gateway:
         """Write minimal decision evidence in the same transaction as any allow."""
         receipt_id = str(uuid4())
         proposal=session.get(Proposal,request_id) if request_id and action is not None else None
-        append_receipt(session,tenant_id=session.info.get('receipt_tenant') or (action.tenant_id if action else None),actor_id=session.info.get('receipt_actor') or (action.actor_id if action else None),grant_jti=proposal.grant_id if proposal else None,id=receipt_id,timestamp=int(time.time()),allowed=allowed,reason=reason,rule_id=rule_id,policy_version=self.policy.policy_version,input_hash=hashlib.sha256(raw).hexdigest(),action_digest=digest(action).removeprefix('sha256:') if action else None,request_id=request_id,refund_id=refund_id)
+        append_receipt(session,tenant_id=session.info.get('receipt_tenant') or (action.tenant_id if action else None),actor_id=session.info.get('receipt_actor') or (action.actor_id if action else None),grant_jti=proposal.grant_id if proposal else None,id=receipt_id,timestamp=int(time.time()),allowed=allowed,reason=reason,rule_id=rule_id,policy_version=session.info.get('effective_policy_version',self.policy.policy_version),input_hash=hashlib.sha256(raw).hexdigest(),action_digest=digest(action).removeprefix('sha256:') if action else None,request_id=request_id,refund_id=refund_id)
         session.flush()
         return receipt_id
 
@@ -68,9 +69,16 @@ class Gateway:
         """Persist a denial after rollback; a failed audit can never return allow."""
         try:
             with Session(self.engine) as session, session.begin():
+                from app.core.receipts import reserve_audit_transaction
+                reserve_audit_transaction(session)
                 session.info.update(receipt_tenant=tenant_id,receipt_actor=actor_id)
+                if tenant_id:
+                    try:effective_policy(session,self.policy,tenant_id)
+                    except (ValueError,TypeError):
+                        failure=GatewayDenied('POLICY_INTEGRITY_ERROR','business.policy_integrity',503)
+                        session.info['effective_policy_version']=self.policy.policy_version
                 receipt_id = self.audit(session,raw,failure.reason,failure.rule_id,False)
-            return {'allowed':False,'reason':failure.reason,'rule_id':failure.rule_id,'policy_version':self.policy.policy_version,'receipt_id':receipt_id},failure.status
+            return {'allowed':False,'reason':failure.reason,'rule_id':failure.rule_id,'policy_version':session.info.get('effective_policy_version',self.policy.policy_version),'receipt_id':receipt_id},failure.status
         except Exception:
             return {'allowed':False,'reason':'AUDIT_UNAVAILABLE','rule_id':'audit.required','policy_version':self.policy.policy_version},503
 
@@ -97,14 +105,14 @@ class Gateway:
             result = {'allowed':True,'reason':'SESSION_REVOKED','rule_id':'auth.operator_session','policy_version':self.policy.policy_version,'receipt_id':receipt_id}
         return result
 
-    def _proposal(self, session: Session, proposal_id: str, tenant_id: str) -> tuple[Proposal,ProposedAction]:
+    def _proposal(self, session: Session, proposal_id: str, tenant_id: str, *, allow_policy_change: bool = False) -> tuple[Proposal,ProposedAction]:
         row = session.scalar(select(Proposal).where(Proposal.id == proposal_id,Proposal.tenant_id == tenant_id))
         if row is None:
             raise GatewayDenied('PROPOSAL_NOT_FOUND','proposal.tenant_lookup',404)
         action = parse_action(row.action)
         if action.tenant_id != tenant_id or not hmac.compare_digest(digest(action),row.action_digest):
             raise GatewayDenied('ACTION_MISMATCH','proposal.integrity')
-        if row.policy_version != self.policy.policy_version:
+        if not allow_policy_change and row.policy_version != effective_policy(session,self.policy,tenant_id).policy_version:
             raise GatewayDenied('POLICY_CHANGED','proposal.policy_version')
         return row,action
 
@@ -114,34 +122,42 @@ class Gateway:
     def submit(self, request: Request, raw: bytes, data: Any) -> dict[str,Any]:
         """Strictly validate an agent proposal and store only a policy-approved preview request."""
         with Session(self.engine) as session, session.begin():
+            reserve_audit_transaction(session)
             agent = authenticate_agent(session,request)
+            lock_tenant_policy(session,agent.tenant_id)
+            policy=effective_policy(session,self.policy,agent.tenant_id)
             action = parse_action(data)
             if action.tenant_id != agent.tenant_id:
                 raise GatewayDenied('WRONG_TENANT','auth.agent_tenant')
             if action.actor_id != agent.actor_id:
                 raise GatewayDenied('ACTOR_MISMATCH','auth.agent_actor')
             resource = self._resource(session,action,agent.tenant_id)
-            decision = self.policy.evaluate(action,resource,agent.tenant_id)
+            decision = policy.evaluate(action,resource,agent.tenant_id)
             enforce(decision)
             proposal_id = str(uuid4())
             action_hash = digest(action)
-            session.add(Proposal(id=proposal_id,tenant_id=agent.tenant_id,service_id=agent.service_id,action=action.model_dump(mode='json'),action_digest=action_hash,policy_version=self.policy.policy_version,status='PENDING',grant_id=None,created_at=int(time.time())))
+            session.add(Proposal(id=proposal_id,tenant_id=agent.tenant_id,service_id=agent.service_id,action=action.model_dump(mode='json'),action_digest=action_hash,policy_version=policy.policy_version,status='PENDING',grant_id=None,created_at=int(time.time())))
             receipt_id = self.audit(session,raw,'PROPOSAL_ACCEPTED',decision.rule_id,True,action=action,request_id=proposal_id)
-            result = {'allowed':True,'reason':'PROPOSAL_ACCEPTED','rule_id':decision.rule_id,'policy_version':self.policy.policy_version,'proposal_id':proposal_id,'action_digest':action_hash,'receipt_id':receipt_id}
+            result = {'allowed':True,'reason':'PROPOSAL_ACCEPTED','rule_id':decision.rule_id,'policy_version':policy.policy_version,'proposal_id':proposal_id,'action_digest':action_hash,'receipt_id':receipt_id}
         return result
 
     def preview(self, request: Request, raw: bytes, proposal_id: str) -> dict[str,Any]:
         """Fetch live state and record exactly what this authenticated human reviewed."""
         with Session(self.engine) as session, session.begin():
+            reserve_audit_transaction(session)
             human = authenticate_operator(session,request,origin=self.settings.origin)
+            lock_tenant_policy(session,human.tenant_id)
+            policy=effective_policy(session,self.policy,human.tenant_id)
             row,action = self._proposal(session,proposal_id,human.tenant_id)
+            if row.status == 'SUPERSEDED':
+                raise GatewayDenied('PROPOSAL_SUPERSEDED','proposal.pending',409)
             if row.status != 'PENDING':
                 raise GatewayDenied('PROPOSAL_ALREADY_APPROVED','proposal.pending')
             resource = self._resource(session,action,human.tenant_id)
-            enforce(self.policy.evaluate_read(scope='payment.read',tenant_id=human.tenant_id,resource=resource))
-            decision = self.policy.evaluate(action,resource,human.tenant_id)
+            enforce(policy.evaluate_read(scope='payment.read',tenant_id=human.tenant_id,resource=resource))
+            decision = policy.evaluate(action,resource,human.tenant_id)
             enforce(decision)
-            values = dict(resource_fingerprint=fingerprint(resource.model_dump()),action_digest=digest(action),policy_version=self.policy.policy_version,created_at=int(time.time()))
+            values = dict(resource_fingerprint=fingerprint(resource.model_dump()),action_digest=digest(action),policy_version=policy.policy_version,created_at=int(time.time()))
             viewed = session.get(ProposalPreview,(proposal_id,human.session_id))
             if viewed is None:
                 session.add(ProposalPreview(proposal_id=proposal_id,session_id=human.session_id,**values))
@@ -149,15 +165,53 @@ class Gateway:
                 for key,value in values.items():
                     setattr(viewed,key,value)
             receipt_id = self.audit(session,raw,'PREVIEW_READY',decision.rule_id,True,action=action,request_id=proposal_id)
-            result = {'allowed':True,'reason':'PREVIEW_READY','rule_id':decision.rule_id,'policy_version':self.policy.policy_version,'proposal_id':proposal_id,'action':action.model_dump(mode='json'),'action_digest':digest(action),'preview':{'payment_id':resource.payment_id,'order_id':resource.order_id,'amount_paise':action.args.amount_paise,'currency':resource.currency,'destination':'original_payment','original_payment_destination':resource.original_destination,'order_version':resource.order_version,'remaining_refundable_paise':resource.remaining_refundable_paise},'receipt_id':receipt_id}
+            result = {'allowed':True,'reason':'PREVIEW_READY','rule_id':decision.rule_id,'policy_version':policy.policy_version,'proposal_id':proposal_id,'action':action.model_dump(mode='json'),'action_digest':digest(action),'preview':{'payment_id':resource.payment_id,'order_id':resource.order_id,'amount_paise':action.args.amount_paise,'currency':resource.currency,'destination':'original_payment','original_payment_destination':resource.original_destination,'order_version':resource.order_version,'remaining_refundable_paise':resource.remaining_refundable_paise,'payment_created_at':resource.payment_created_at,'refund_deadline_at':resource.payment_created_at+policy.tenants[human.tenant_id].refund_window_days*86400 if resource.payment_created_at is not None and policy.tenants[human.tenant_id].refund_window_days is not None else None},'receipt_id':receipt_id}
         return result
+
+    def refresh_proposal(self, request: Request, raw: bytes, proposal_id: str, data: Any) -> dict[str,Any]:
+        """Create a fresh unapproved proposal after live state changes; never reuse consent.
+
+        The original action remains immutable. Only resource_version is rebased;
+        tool, payment, amount, destination, tenant, actor and service stay bound.
+        """
+        from app.core.receipts import reserve_audit_transaction
+        with Session(self.engine) as session,session.begin():
+            reserve_audit_transaction(session)
+            human=authenticate_operator(session,request,csrf=True,origin=self.settings.origin)
+            lock_tenant_policy(session,human.tenant_id)
+            policy=effective_policy(session,self.policy,human.tenant_id)
+            ApproveRequest.model_validate(data)
+            row,action=self._proposal(session,proposal_id,human.tenant_id,allow_policy_change=True)
+            if row.status!='PENDING' or row.grant_id is not None:
+                raise GatewayDenied('PROPOSAL_NOT_REFRESHABLE','proposal.pending',409)
+            resource=self._resource(session,action,human.tenant_id)
+            enforce(policy.evaluate_read(scope='payment.read',tenant_id=human.tenant_id,resource=resource))
+            refreshed=parse_action({**action.model_dump(mode='json'),'resource_version':resource.order_version})
+            decision=policy.evaluate(refreshed,resource,human.tenant_id)
+            enforce(decision)
+            if refreshed.resource_version==action.resource_version and row.policy_version==policy.policy_version:
+                receipt=self.audit(session,raw,'PROPOSAL_CURRENT','proposal.refresh',True,action=action,request_id=row.id)
+                return {'allowed':True,'reason':'PROPOSAL_CURRENT','proposal_id':row.id,'receipt_id':receipt,'rule_id':'proposal.refresh','policy_version':policy.policy_version}
+            changed=session.execute(update(Proposal).where(Proposal.id==row.id,Proposal.status=='PENDING',Proposal.grant_id.is_(None)).values(status='SUPERSEDED'))
+            if changed.rowcount!=1:
+                raise GatewayDenied('PROPOSAL_NOT_REFRESHABLE','proposal.pending',409)
+            self.audit(session,raw,'POLICY_CHANGED' if row.policy_version!=policy.policy_version else 'STALE_RESOURCE','proposal.superseded',False,action=action,request_id=row.id)
+            identifier=str(uuid4())
+            session.add(Proposal(id=identifier,tenant_id=human.tenant_id,service_id=row.service_id,action=refreshed.model_dump(mode='json'),action_digest=digest(refreshed),policy_version=policy.policy_version,status='PENDING',grant_id=None,created_at=int(time.time())))
+            receipt=self.audit(session,raw,'PROPOSAL_REFRESHED','proposal.refresh',True,action=refreshed,request_id=identifier)
+            return {'allowed':True,'reason':'PROPOSAL_REFRESHED','proposal_id':identifier,'superseded_proposal_id':row.id,'action_digest':digest(refreshed),'receipt_id':receipt,'rule_id':'proposal.refresh','policy_version':policy.policy_version}
 
     def approve(self, request: Request, raw: bytes, proposal_id: str, data: Any, *, deliver: bool = False) -> dict[str,Any]:
         """Re-fetch, recompute, require the viewed effect, and issue consent atomically."""
         with Session(self.engine) as session, session.begin():
+            reserve_audit_transaction(session)
             human = authenticate_operator(session,request,csrf=True,origin=self.settings.origin)
+            lock_tenant_policy(session,human.tenant_id)
+            policy=effective_policy(session,self.policy,human.tenant_id)
             ApproveRequest.model_validate(data)
             row,action = self._proposal(session,proposal_id,human.tenant_id)
+            if row.status == 'SUPERSEDED':
+                raise GatewayDenied('PROPOSAL_SUPERSEDED','proposal.pending',409)
             cipher=None
             if deliver:
                 if self.executor is None:
@@ -174,16 +228,16 @@ class Gateway:
             if row.status != 'PENDING':
                 raise GatewayDenied('PROPOSAL_ALREADY_APPROVED','proposal.pending')
             resource = self._resource(session,action,human.tenant_id,for_update=True)
-            enforce(self.policy.evaluate_read(scope='payment.read',tenant_id=human.tenant_id,resource=resource))
-            decision = self.policy.evaluate(action,resource,human.tenant_id)
+            enforce(policy.evaluate_read(scope='payment.read',tenant_id=human.tenant_id,resource=resource))
+            decision = policy.evaluate(action,resource,human.tenant_id)
             enforce(decision)
             action_hash = digest(action)
             viewed = session.get(ProposalPreview,(proposal_id,human.session_id))
             if viewed is None:
                 raise GatewayDenied('PREVIEW_REQUIRED','approval.human_preview')
-            if viewed.policy_version != self.policy.policy_version or not hmac.compare_digest(viewed.action_digest,action_hash) or not hmac.compare_digest(viewed.resource_fingerprint,fingerprint(resource.model_dump())):
+            if viewed.policy_version != policy.policy_version or not hmac.compare_digest(viewed.action_digest,action_hash) or not hmac.compare_digest(viewed.resource_fingerprint,fingerprint(resource.model_dump())):
                 raise GatewayDenied('PREVIEW_STALE','approval.reviewed_effect')
-            grant_service = GrantService(self.engine,GrantSettings(issuer=self.settings.issuer,policy_version=self.policy.policy_version,signing_kid=human.signing_kid),private_key_loader=lambda: load_private_key_for_kid(human.signing_kid))
+            grant_service = GrantService(self.engine,GrantSettings(issuer=self.settings.issuer,policy_version=policy.policy_version,signing_kid=human.signing_kid),private_key_loader=lambda: load_private_key_for_kid(human.signing_kid))
             token = grant_service.issue_grant(action_hash,human.operator_id,human.tenant_id,resource.order_version,session=session)
             grant = session.scalar(select(UsedGrant).where(UsedGrant.token_hash == hashlib.sha256(token.encode()).hexdigest()))
             if grant is None:
@@ -196,7 +250,7 @@ class Gateway:
                 assert cipher is not None
                 now=int(time.time())
                 session.add(ApprovalDispatch(proposal_id=proposal_id,tenant_id=human.tenant_id,token_ciphertext=cipher.encrypt(token.encode()).decode(),idempotency_key='approval-'+grant.id,status='QUEUED',reason='APPROVED',operation_id=None,created_at=now,next_attempt_at=now,lease_owner=None,lease_until=None))
-            result = {'allowed':True,'reason':'APPROVED','rule_id':'approval.human_consent','policy_version':self.policy.policy_version,'proposal_id':proposal_id,'grant_token':token,'action_digest':action_hash,'expires_at':grant.payload['exp'],'receipt_id':receipt_id}
+            result = {'allowed':True,'reason':'APPROVED','rule_id':'approval.human_consent','policy_version':policy.policy_version,'proposal_id':proposal_id,'grant_token':token,'action_digest':action_hash,'expires_at':grant.payload['exp'],'receipt_id':receipt_id}
             if deliver:
                 result.pop('grant_token')
                 result.update(dispatch_status='QUEUED',_http_status=202)
@@ -239,6 +293,8 @@ class Gateway:
                 result = {**prior.result,'reason':'IDEMPOTENT_RETRY','rule_id':'execution.idempotent_retry','policy_version':self.policy.policy_version,'execution_policy_version':prior.result['policy_version']}
                 result['receipt_id'] = self.audit(session,raw,'IDEMPOTENT_RETRY','execution.idempotent_retry',True,action=action,refund_id=result['refund_id'])
                 return result
+            lock_tenant_policy(session,agent.tenant_id)
+            policy=effective_policy(session,self.policy,agent.tenant_id)
             resource = self._resource(session,action,agent.tenant_id,for_update=True)
             grant_service = GrantService(self.engine,GrantSettings(issuer=self.settings.issuer,policy_version=self.policy.policy_version))
             verified = grant_service.verify_grant(body.grant_token,digest(action),agent.tenant_id,resource.order_version,session=session)
@@ -249,16 +305,16 @@ class Gateway:
             proposal = session.scalar(select(Proposal).where(Proposal.grant_id == verified.claims.jti,Proposal.tenant_id == agent.tenant_id,Proposal.service_id == agent.service_id))
             if proposal is None or proposal.status != 'APPROVED':
                 raise GatewayDenied('PROPOSAL_NOT_APPROVED','execution.approved_proposal')
-            if proposal.policy_version != self.policy.policy_version:
+            if proposal.policy_version != policy.policy_version:
                 raise GatewayDenied('POLICY_CHANGED','execution.approved_policy')
             if not hmac.compare_digest(proposal.action_digest,digest(action)):
                 raise GatewayDenied('ACTION_MISMATCH','execution.approved_action')
-            decision = self.policy.evaluate(action,resource,agent.tenant_id)
+            decision = policy.evaluate(action,resource,agent.tenant_id)
             enforce(decision)
             if proposal.approved_resource_fingerprint is None or not hmac.compare_digest(proposal.approved_resource_fingerprint,fingerprint(resource.model_dump())):
                 raise GatewayDenied('STALE_RESOURCE','execution.approved_resource')
             refund_id = self.orchestrator.execute(session,action,resource,verified.claims.jti,proposal.id)
             receipt_id = self.audit(session,raw,'EXECUTED',decision.rule_id,True,action=action,request_id=proposal.id,refund_id=refund_id)
-            result = {'allowed':True,'reason':'EXECUTED','rule_id':decision.rule_id,'policy_version':self.policy.policy_version,'refund_id':refund_id,'action_digest':digest(action),'receipt_id':receipt_id}
+            result = {'allowed':True,'reason':'EXECUTED','rule_id':decision.rule_id,'policy_version':policy.policy_version,'refund_id':refund_id,'action_digest':digest(action),'receipt_id':receipt_id}
             session.add(Execution(id=execution_id,fingerprint=request_hash,result=result))
         return result

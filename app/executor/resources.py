@@ -23,17 +23,19 @@ def apply_payment(session: Session, live: ProviderPayment, tenant_id: str) -> Pa
     if order is None or order.tenant_id != tenant_id or order.paid_paise != live.amount_paise or order.currency != live.currency:
         raise GatewayDenied('RESOURCE_MISMATCH','executor.provider_binding')
     cached = session.get(Resource,payment.id)
+    if cached is not None and cached.payment_created_at is not None and cached.payment_created_at!=live.created_at:
+        raise GatewayDenied('PAYMENT_DATE_MISMATCH','executor.payment_date')
     changed = (cached is not None and cached.version_hash != live.version_hash) or order.refunded_paise != live.amount_refunded_paise
     if changed:
         if order.version >= MAX_SAFE_INTEGER:
             raise GatewayDenied('STALE_RESOURCE','executor.version_limit')
         order.refunded_paise = live.amount_refunded_paise
         order.version += 1
-    values = dict(tenant_id=tenant_id,provider_id=live.provider_id,amount_paise=live.amount_paise,amount_refunded_paise=live.amount_refunded_paise,currency=live.currency,status=live.status,version_hash=live.version_hash,synced_at=int(time.time()))
+    values = dict(tenant_id=tenant_id,provider_id=live.provider_id,amount_paise=live.amount_paise,amount_refunded_paise=live.amount_refunded_paise,currency=live.currency,status=live.status,version_hash=live.version_hash,payment_created_at=live.created_at,synced_at=int(time.time()))
     if cached is None:
         session.add(Resource(id=payment.id,**values))
     else:
         for name,value in values.items():
             setattr(cached,name,value)
     session.flush()
-    return PaymentSnapshot(payment_id=payment.id,order_id=order.id,tenant_id=tenant_id,currency=live.currency,original_destination=order.destination,destination_kind=payment.destination_kind,paid_paise=live.amount_paise,refunded_paise=live.amount_refunded_paise,order_version=order.version,in_flight_refunds=1 if payment.in_flight else 0,version_hash=live.version_hash,provider_status=live.status)
+    return PaymentSnapshot(payment_id=payment.id,order_id=order.id,tenant_id=tenant_id,currency=live.currency,original_destination=order.destination,destination_kind=payment.destination_kind,paid_paise=live.amount_paise,refunded_paise=live.amount_refunded_paise,order_version=order.version,in_flight_refunds=1 if payment.in_flight else 0,version_hash=live.version_hash,provider_status=live.status,payment_created_at=live.created_at)

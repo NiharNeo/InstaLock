@@ -84,6 +84,13 @@ def create_app(settings: ExecutorSettings | None = None, *, provider: RefundProv
                     with service.engine.connect() as connection:
                         connection.execute(select(literal(1)))
                     return {'status':'ready'}
+                if request.url.path.startswith('/internal/store/'):
+                    from app.commerce.executor import checkout_rpc
+                    return checkout_rpc(service,data,request.url.path.rsplit('/',1)[-1])
+                if request.url.path=='/internal/integrations/status':
+                    if set(data)!={'tenant_id'} or data['tenant_id']!=service.settings.tenant_id:
+                        raise GatewayDenied('WRONG_TENANT','executor.integration_scope')
+                    return {'provider':'razorpay','status':'CONFIGURED','mode':'test','account_id':service.settings.account_id,'tenant_id':service.settings.tenant_id}
                 if request.url.path.endswith('/payments/get'):
                     if set(data)!={'tenant_id','payment_id'} or data['tenant_id']!=service.settings.tenant_id:
                         raise GatewayDenied('WRONG_TENANT','executor.payment_scope')
@@ -113,9 +120,21 @@ def create_app(settings: ExecutorSettings | None = None, *, provider: RefundProv
         """Authenticate the gateway's readiness probe without contacting the provider."""
         return await dispatch(request)
 
+    @app.post('/internal/integrations/status')
+    async def integration_status(request: Request) -> JSONResponse:
+        """Report executor configuration to its own business without returning any key material."""
+        return await dispatch(request)
+
     @app.post('/internal/payments/get')
     async def get_payment(request: Request) -> JSONResponse:
         """Return an authenticated live provider projection without holding SQL locks."""
+        return await dispatch(request)
+
+    @app.post('/internal/store/{operation}')
+    async def commerce(request: Request,operation: str) -> JSONResponse:
+        """Provider-isolated commerce RPC; no public or agent credential is accepted."""
+        if operation not in {'create','confirm','status'}:
+            return JSONResponse({'reason':'ENDPOINT_NOT_ALLOWED'},status_code=404)
         return await dispatch(request)
 
     @app.post('/internal/execute')
@@ -147,6 +166,15 @@ def process_webhook(service: ExecutorService, data: dict[str,Any], raw: bytes, e
         return service.deny(GatewayDenied('WEBHOOK_DUPLICATE','webhook.idempotency',200),raw)
     entity=data['payload']['refund' if event.startswith('refund.') else 'payment']['entity']
     payment_id=entity['payment_id'] if event.startswith('refund.') else entity['id']
+    if event=='payment.captured':
+        from intentlock.db import StoreCheckout
+        with Session(service.engine) as session:
+            mapped=session.get(Payment,payment_id)
+            checkout=session.scalar(select(StoreCheckout).where(StoreCheckout.provider_order_id==entity.get('order_id'),StoreCheckout.tenant_id==service.settings.tenant_id)) if mapped is None else None
+            checkout_id=checkout.id if checkout else None
+        if checkout_id:
+            from app.commerce.executor import bind_payment
+            bind_payment(service,checkout_id,service.provider.checkout_payment(payment_id))
     service.refresh(payment_id)
     import time
     from sqlalchemy.exc import IntegrityError

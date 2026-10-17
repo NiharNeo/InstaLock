@@ -1,0 +1,22 @@
+# Permanent HTTPS ingress for an existing IntentLock stack on a Docker VM.
+name: intentlock-public
+services:
+  https:
+    image: caddy:2-alpine
+    environment:
+      PUBLIC_HOST: ${PUBLIC_HOST:?set a domain with DNS pointing to this server}
+    ports: ['80:80', '443:443', '443:443/udp']
+    volumes:
+      - ./public.Caddyfile:/etc/caddy/Caddyfile:ro
+      - certificates:/data
+      - caddy_config:/config
+    networks: [ledger]
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+networks:
+  ledger:
+    external: true
+    name: ${INTENTLOCK_NETWORK:-intentlock-local_default}
+volumes:
+  certificates: {}
+  caddy_config: {}

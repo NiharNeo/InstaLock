@@ -15,6 +15,10 @@ from app.intake.api import router as intake_router
 from app.agent.api import router as agent_router
 from app.api.eval_runs import router as eval_router
 from app.api.console import router as console_router
+from app.api.business import router as business_router
+from app.api.insights import router as insights_router
+from app.commerce.api import router as commerce_router
+from app.auth.oidc import router as oidc_router
 from app.api.health import router as health_router
 from app.api.receipts import router as receipts_router
 from app.core.receipts import load_receipt_key
@@ -72,6 +76,10 @@ def create_app(settings: GatewaySettings | None = None, *, adapter: ResourceAdap
     app.include_router(receipts_router)
     app.include_router(eval_router)
     app.include_router(console_router)
+    app.include_router(business_router)
+    app.include_router(insights_router)
+    app.include_router(commerce_router)
+    app.include_router(oidc_router)
     app.include_router(health_router)
     app.include_router(intake_router)
     app.include_router(agent_router)
@@ -124,6 +132,8 @@ def create_app(settings: GatewaySettings | None = None, *, adapter: ResourceAdap
                 assert proposal_id is not None
                 if operation == 'preview':
                     return gateway.preview(request,raw,proposal_id)
+                if operation == 'refresh_proposal':
+                    return gateway.refresh_proposal(request,raw,proposal_id,data)
                 return gateway.approve(request,raw,proposal_id,data,deliver=operation=='approve_dispatch')
             result = await run_in_threadpool(handle)
             cookie_token = result.pop('_cookie_token',None)
@@ -173,6 +183,11 @@ def create_app(settings: GatewaySettings | None = None, *, adapter: ResourceAdap
     async def approve(request: Request, proposal_id: str) -> JSONResponse:
         """Require a human session and CSRF; never take a client action digest."""
         return await dispatch(request,'approve',proposal_id)
+
+    @app.post('/v1/proposals/{proposal_id}/refresh')
+    async def refresh_proposal(request: Request, proposal_id: str) -> JSONResponse:
+        """Re-propose unchanged refund intent against live state; fresh review is mandatory."""
+        return await dispatch(request,'refresh_proposal',proposal_id)
 
     @app.post('/v1/proposals/{proposal_id}/approve-and-execute')
     async def approve_dispatch(request: Request, proposal_id: str) -> JSONResponse:

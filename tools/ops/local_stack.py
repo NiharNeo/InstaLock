@@ -106,7 +106,16 @@ def prepare(runtime: Path) -> Path:
     common={'DATABASE_URL':'sqlite:////data/intentlock.db','POLICY_FILE':'/app/policies/refunds.yaml','GRANT_ISSUER':gateway['GRANT_ISSUER'],'EXECUTOR_AUTH_TOKEN':gateway['EXECUTOR_AUTH_TOKEN'],'RECEIPT_PRIVATE_KEY_FILE':'/run/secrets/receipt.pem'}
     if executor['EXECUTOR_AUTH_TOKEN']!=gateway['EXECUTOR_AUTH_TOKEN']:
         raise ValueError('MATCHING_EXECUTOR_TOKEN_REQUIRED')
-    gw={**common,'APP_ORIGIN':'http://127.0.0.1:8080','EXECUTOR_URL':'http://executor:8001','GRANT_PRIVATE_KEY_FILE':'/run/secrets/operator.pem','GRANT_PRIVATE_KEY_PASSWORD':gateway.get('GRANT_PRIVATE_KEY_PASSWORD',''),'DISPATCH_KEY_FILE':'/run/secrets/dispatch.key','INTAKE_RATE_SECRET':gateway['INTAKE_RATE_SECRET'],'SESSION_CSRF_SECRET':gateway['SESSION_CSRF_SECRET']}
+    gw={**common,'APP_ORIGIN':gateway.get('DEPLOYMENT_ORIGIN','http://127.0.0.1:8080'),'EXECUTOR_URL':'http://executor:8001','GRANT_PRIVATE_KEY_FILE':'/run/secrets/operator.pem','GRANT_PRIVATE_KEY_PASSWORD':gateway.get('GRANT_PRIVATE_KEY_PASSWORD',''),'DISPATCH_KEY_FILE':'/run/secrets/dispatch.key','INTAKE_RATE_SECRET':gateway['INTAKE_RATE_SECRET'],'SESSION_CSRF_SECRET':gateway['SESSION_CSRF_SECRET']}
+    if gateway.get('PUBLIC_STORE_CHANNEL'):
+        gw['PUBLIC_STORE_CHANNEL']=gateway['PUBLIC_STORE_CHANNEL']
+    if gateway.get('STORE_PUBLIC_ORIGIN'):
+        gw['STORE_PUBLIC_ORIGIN']=gateway['STORE_PUBLIC_ORIGIN']
+    if gateway.get('OIDC_ISSUER'):
+        if not gateway.get('OIDC_CLIENT_ID'):
+            raise ValueError('OIDC_CLIENT_ID_REQUIRED')
+        write_protected(target/'gateway'/'oidc-client-secret',secret(gateway,'OIDC_CLIENT_SECRET'))
+        gw.update(OIDC_ISSUER=gateway['OIDC_ISSUER'],OIDC_CLIENT_ID=gateway['OIDC_CLIENT_ID'],OIDC_CLIENT_SECRET_FILE='/run/secrets/oidc-client-secret',OIDC_DISPLAY_NAME=gateway.get('OIDC_DISPLAY_NAME','Company SSO'))
     ex={**common,**{k:executor[k] for k in ('EXECUTOR_TENANT_ID','RAZORPAY_ACCOUNT_ID')},'RAZORPAY_KEY_ID_FILE':'/run/secrets/razorpay-key-id','RAZORPAY_KEY_SECRET_FILE':'/run/secrets/razorpay-key-secret','RAZORPAY_WEBHOOK_SECRET_FILE':'/run/secrets/webhook-secret'}
     ag={k:agent[k] for k in ('AGENT_SERVICE_KEY','GEMINI_API_KEY','GEMINI_MODEL')};ag['GATEWAY_URL']='http://gateway:8000'
     policy_mount=str(target/'policy')+':/app/policies:ro'

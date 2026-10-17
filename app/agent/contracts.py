@@ -20,4 +20,4 @@ class CallReport(_Contract):
     output_tokens: Annotated[int,Field(strict=True,ge=0,le=9007199254740991)] | None
     total_tokens: Annotated[int,Field(strict=True,ge=0,le=9007199254740991)] | None
     latency_ms: Annotated[int,Field(strict=True,ge=0,le=9007199254740991)]
-    outcome: Literal['INVALID_PROPOSAL','MODEL_ERROR','NO_PROPOSAL','PROPOSAL_SUBMITTED','POLICY_DENIED']
+    outcome: Literal['INVALID_PROPOSAL','MODEL_ERROR','NO_PROPOSAL','PROPOSAL_SUBMITTED','POLICY_DENIED','SUBMISSION_UNCERTAIN']

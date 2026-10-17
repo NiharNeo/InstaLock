@@ -37,6 +37,7 @@ class Ticket(Base):
     text: Mapped[str] = mapped_column(String)
     redacted_text: Mapped[str | None] = mapped_column(String,nullable=True)
     source_id: Mapped[str | None] = mapped_column(String(64),nullable=True,unique=True)
+    created_at: Mapped[int | None] = mapped_column(BigInteger,nullable=True)
     processing_status: Mapped[str] = mapped_column(String(16),default='QUEUED',server_default='QUEUED')
     claimed_by: Mapped[str | None] = mapped_column(String(128),nullable=True)
     claim_token: Mapped[str | None] = mapped_column(String(128),nullable=True)
@@ -186,6 +187,7 @@ class Resource(Base):
     currency: Mapped[str] = mapped_column(String(3))
     status: Mapped[str] = mapped_column(String(32))
     version_hash: Mapped[str] = mapped_column(String(64))
+    payment_created_at: Mapped[int | None] = mapped_column(BigInteger,nullable=True)
     synced_at: Mapped[int] = mapped_column(BigInteger)
 
 class Operation(Base):
@@ -302,3 +304,86 @@ class ApprovalDispatch(Base):
     next_attempt_at: Mapped[int] = mapped_column(BigInteger)
     lease_owner: Mapped[str | None] = mapped_column(String(128),nullable=True)
     lease_until: Mapped[int | None] = mapped_column(BigInteger,nullable=True)
+
+class SSOIdentity(Base):
+    """Explicitly invited business identity; no email-domain auto-enrollment."""
+    __tablename__ = 'sso_identities'
+    email: Mapped[str] = mapped_column(String(254), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey('users.id'))
+    signing_kid: Mapped[str] = mapped_column(ForeignKey('key_registry.kid'))
+    issuer: Mapped[str] = mapped_column(String(512))
+    subject: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    active: Mapped[bool] = mapped_column(Boolean)
+
+class SSOAttempt(Base):
+    """One-use browser-bound OIDC state; PKCE verifier encrypted at rest."""
+    __tablename__ = 'sso_attempts'
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    browser_hash: Mapped[str] = mapped_column(String(64))
+    nonce: Mapped[str] = mapped_column(String(128))
+    verifier_ciphertext: Mapped[str] = mapped_column(String(1024))
+    expires_at: Mapped[int] = mapped_column(BigInteger)
+    used: Mapped[bool] = mapped_column(Boolean)
+
+class IntegrationRequest(Base):
+    """Real business request for deployment of an executor-owned provider plugin."""
+    __tablename__ = 'integration_requests'
+    tenant_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    provider: Mapped[str] = mapped_column(String(32), primary_key=True)
+    requested_by: Mapped[str] = mapped_column(ForeignKey('users.id'))
+    status: Mapped[str] = mapped_column(String(32))
+    created_at: Mapped[int] = mapped_column(BigInteger)
+
+class BusinessRefundPolicy(Base):
+    """Current immutable revision pointer for operator-authored refund restrictions."""
+    __tablename__ = 'business_refund_policies'
+    tenant_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    revision_id: Mapped[str] = mapped_column(String(64))
+
+class RefundPolicyRevision(Base):
+    """Append-only business policy with exact rules, author and content hash."""
+    __tablename__ = 'refund_policy_revisions'
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(128), index=True)
+    rules: Mapped[dict[str, Any]] = mapped_column(JSON)
+    content_hash: Mapped[str] = mapped_column(String(71))
+    created_by: Mapped[str] = mapped_column(ForeignKey('users.id'))
+    created_at: Mapped[int] = mapped_column(BigInteger)
+
+class StoreProduct(Base):
+    """Operator-managed catalog; application startup never inserts products."""
+    __tablename__='store_products'
+    id: Mapped[str] = mapped_column(String(64),primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(128),index=True)
+    name: Mapped[str] = mapped_column(String(120))
+    category: Mapped[str] = mapped_column(String(80))
+    description: Mapped[str] = mapped_column(String(1000))
+    price_paise: Mapped[int] = mapped_column(BigInteger)
+    active: Mapped[bool] = mapped_column(Boolean)
+    created_at: Mapped[int] = mapped_column(BigInteger)
+
+class StoreCheckout(Base):
+    """Immutable priced basket and private shopper capability, bound to a provider order."""
+    __tablename__='store_checkouts'
+    __table_args__=(UniqueConstraint('tenant_id','shopper_hash','idempotency_key',name='uq_store_checkout_key'),)
+    id: Mapped[str] = mapped_column(String(64),primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(128),index=True)
+    channel_id: Mapped[str] = mapped_column(ForeignKey('support_channels.id'))
+    shopper_hash: Mapped[str] = mapped_column(String(64))
+    idempotency_key: Mapped[str] = mapped_column(String(64))
+    basket_hash: Mapped[str] = mapped_column(String(64))
+    items: Mapped[list[dict[str,Any]]] = mapped_column(JSON)
+    amount_paise: Mapped[int] = mapped_column(BigInteger)
+    provider_order_id: Mapped[str | None] = mapped_column(String(128),nullable=True,unique=True)
+    payment_id: Mapped[str | None] = mapped_column(String(128),nullable=True,unique=True)
+    status: Mapped[str] = mapped_column(String(24))
+    created_at: Mapped[int] = mapped_column(BigInteger)
+    paid_at: Mapped[int | None] = mapped_column(BigInteger,nullable=True)
+
+class StoreSupportRequest(Base):
+    """Purchased item selection is trusted separately from untrusted ticket prose."""
+    __tablename__='store_support_requests'
+    ticket_id: Mapped[str] = mapped_column(ForeignKey('tickets.id'),primary_key=True)
+    checkout_id: Mapped[str] = mapped_column(ForeignKey('store_checkouts.id'))
+    product_id: Mapped[str] = mapped_column(String(64))
+    requested_paise: Mapped[int] = mapped_column(BigInteger)

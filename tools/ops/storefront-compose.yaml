@@ -1,0 +1,30 @@
+# Public prototype: customer store and authenticated operator UI; internal executor RPC remains blocked.
+name: intentlock-storefront
+services:
+  ingress:
+    image: nginxinc/nginx-unprivileged:alpine
+    environment:
+      STORE_CHANNEL: ${STORE_CHANNEL:?set an existing database support channel}
+      NGINX_ENVSUBST_FILTER: ^STORE_CHANNEL$
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs: [/tmp, "/etc/nginx/conf.d:uid=101,gid=101,mode=0755"]
+    volumes:
+      - ./storefront-nginx.conf:/etc/nginx/templates/default.conf.template:ro
+    networks: [ledger, edge]
+    restart: unless-stopped
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    command: [tunnel, --no-autoupdate, --protocol, http2, --url, 'http://ingress:8080']
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    networks: [edge]
+    depends_on: [ingress]
+    restart: unless-stopped
+networks:
+  ledger:
+    external: true
+    name: ${INTENTLOCK_NETWORK:-intentlock-local_default}
+  edge: {}

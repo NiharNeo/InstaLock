@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
@@ -60,6 +61,7 @@ class PaymentSnapshot(_Contract):
 
     version_hash: str | None = Field(default=None,pattern=r'^[0-9a-f]{64}$')
     provider_status: str | None = None
+    payment_created_at: PositiveInteger | None = None
 
     @model_validator(mode='after')
     def _balance(self) -> PaymentSnapshot:
@@ -87,6 +89,8 @@ class _Tenant:
     tools: frozenset[str]
     max_refund_paise: int
     read_scopes: frozenset[str]
+    refund_window_days: int | None = None
+    partial_refunds: str = 'allow'
 
 
 class _UniqueLoader(yaml.SafeLoader):
@@ -169,6 +173,13 @@ class PolicyEngine:
                 return self.decision(False, 'INSUFFICIENT_REFUNDABLE', 'refundable_remaining')
             if resource.in_flight_refunds:
                 return self.decision(False, 'REFUND_IN_FLIGHT', 'one_in_flight')
+            if config.refund_window_days is not None:
+                if resource.payment_created_at is None or resource.payment_created_at>int(time.time()):
+                    return Decision(False,'PAYMENT_DATE_UNAVAILABLE','business.payment_date',self.policy_version)
+                if int(time.time())>=resource.payment_created_at+config.refund_window_days*86400:
+                    return Decision(False,'REFUND_WINDOW_EXPIRED','business.refund_window',self.policy_version)
+            if config.partial_refunds=='deny' and action.args.amount_paise!=resource.remaining_refundable_paise:
+                return Decision(False,'PARTIAL_REFUND_NOT_ALLOWED','business.partial_refund',self.policy_version)
             return self.decision(True, 'REFUND_ALLOWED', 'refund_allow')
         except Exception:
             return self.decision(False, 'POLICY_ERROR', 'default_deny')

@@ -16,6 +16,7 @@ class ProviderPayment(_Contract):
     amount_refunded_paise: Annotated[int,Field(strict=True,ge=0,le=MAX_SAFE_INTEGER)]
     currency: Literal['INR']
     status: Literal['created','authorized','captured','refunded','failed']
+    created_at: PositiveInteger | None = None
 
     @model_validator(mode='after')
     def _balance(self) -> 'ProviderPayment':

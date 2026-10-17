@@ -1,5 +1,6 @@
 """Isolated proposal worker: Gateway service key and Gemini key, never signing/DB keys."""
 import argparse
+import logging
 from dataclasses import dataclass, field
 import os
 import time
@@ -53,7 +54,8 @@ class ProposalWorker:
             outcome='NO_PROPOSAL' if suggestion is None else 'PROPOSAL_SUBMITTED'
         except InvalidProposal:
             outcome='INVALID_PROPOSAL'
-        except Exception:
+        except Exception as error:
+            logging.warning('Model request failed (%s)',type(error).__name__)
             outcome='MODEL_ERROR'
         latency_ms=(time.perf_counter_ns()-started)//1000000
         # Authorization fields come from trusted context, never from model arguments.
@@ -63,7 +65,7 @@ class ProposalWorker:
                 proposed=self._post('v1/proposals',action)
                 outcome='PROPOSAL_SUBMITTED' if proposed.status_code==201 else 'POLICY_DENIED'
             except Exception:
-                outcome='MODEL_ERROR'  # No automatic execution or approval follows a lost reply.
+                outcome='SUBMISSION_UNCERTAIN'  # A proposal may exist; never automatically resubmit it.
         metrics={name:self.model.usage.get(name) for name in ('input_tokens','output_tokens','total_tokens')}
         result=self._post('v1/agent/model-calls',{'ticket_id':ticket['ticket_id'],'claim_token':ticket['claim_token'],'model':self.model.model,'latency_ms':latency_ms,'outcome':outcome,**metrics})
         result.raise_for_status()  # Stop if audit cannot persist; never silently discard it.
