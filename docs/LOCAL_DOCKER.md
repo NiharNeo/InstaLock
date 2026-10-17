@@ -87,6 +87,44 @@ signatures remain mandatory. A local HTTP address is not reachable by Razorpay:
 a public HTTPS ingress/tunnel and actual dashboard webhook registration are still
 required for real webhook delivery. No fake webhook is sent as deployment proof.
 
+### Temporary webhook-only HTTPS ingress
+
+With the local stack running, start the separate demo ingress:
+
+```sh
+docker compose -f tools/ops/webhook-compose.yaml up -d
+docker compose -f tools/ops/webhook-compose.yaml logs tunnel
+```
+
+Append `/v1/webhooks/razorpay` to the actual HTTPS `trycloudflare.com` address
+printed in the tunnel logs. Register that URL in the Razorpay **Test Mode**
+dashboard using the existing executor webhook secret from its protected secret
+file. Do not use the API key secret as the webhook secret. Subscribe to
+`payment.authorized`, `payment.captured`, `payment.failed`, `refund.created`,
+`refund.processed`, and `refund.failed`. The executor accepts only authenticated
+events for its configured account and already mapped payments.
+
+The ingress allows only POST to the exact webhook path, rejects query strings,
+limits request bodies to 128 KiB, and strips cookies and Authorization headers.
+All other paths return 404; the operator console, support form and execution API
+remain local. The tunnel container has no ledger, signing or provider secrets and
+shares only an isolated edge network with the proxy. The proxy additionally joins
+the existing trusted stack network to reach the executor. Neither container
+publishes a host port. Override `INTENTLOCK_NETWORK` for a different existing
+Compose network name.
+
+This is a temporary demo URL: restarting the tunnel process can change it and
+requires updating the dashboard registration. It has no production availability
+guarantee. To stop just the public ingress:
+
+```sh
+docker compose -f tools/ops/webhook-compose.yaml down
+```
+
+An unsigned request rejected with `BAD_SIGNATURE` proves route/signature
+enforcement only. It does not count as verified provider webhook history; that
+requires an actual Razorpay delivery and a persisted `WEBHOOK_APPLIED` event.
+
 ## Live-ledger backup
 
 ```sh
