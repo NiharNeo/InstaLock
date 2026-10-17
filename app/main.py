@@ -15,6 +15,7 @@ from app.intake.api import router as intake_router
 from app.agent.api import router as agent_router
 from app.api.eval_runs import router as eval_router
 from app.api.console import router as console_router
+from app.api.health import router as health_router
 from app.api.receipts import router as receipts_router
 from app.core.receipts import load_receipt_key
 from app.api.gateway import Gateway
@@ -71,6 +72,7 @@ def create_app(settings: GatewaySettings | None = None, *, adapter: ResourceAdap
     app.include_router(receipts_router)
     app.include_router(eval_router)
     app.include_router(console_router)
+    app.include_router(health_router)
     app.include_router(intake_router)
     app.include_router(agent_router)
 

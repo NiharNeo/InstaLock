@@ -84,7 +84,9 @@ Open http://localhost:8080. Host ports bind only loopback. The named `ledger`
 volume persists real records, and `./policies` is mounted read-only. A changed
 policy requires restarting gateway, executor and reconciler. A one-shot `migrate`
 service completes Alembic before all three services start. Docker Engine must be
-running. Image build/startup was not exercised in this environment.
+running. The local Docker deployment has been built and health-checked using
+the actual database and isolated credential volumes. See [the local Docker
+runbook](docs/LOCAL_DOCKER.md) for the configured migration and restart workflow.
 
 ## Executor configuration
 
@@ -106,8 +108,9 @@ and payment mappings must already refer to actual imported records; webhooks nev
 create orders from untrusted event contents. Unprocessed provider refunds remain
 PENDING until the reconciler observes their final status.
 
-No real Razorpay credentials were supplied here. Adapter protocol tests use
-synthetic fixtures exclusively in tests; no live test-account refund was performed.
+One real Razorpay Test Mode refund has been processed and verified against both
+the provider and ledger. This is functional smoke evidence, not a full live
+benchmark. Automated protocol tests use synthetic fixtures exclusively in tests.
 
 ## Real-data and credential provisioning
 
@@ -515,9 +518,10 @@ character decoded cap; attachments are ignored and HTML-only/unsupported/oversiz
 messages get durable rejection markers and signed denials, so they do not starve
 subsequent mail. Sender text/headers never select tenant or authorize an order.
 
-No live Gemini call, mailbox connection or provider refund was made during local
-verification because real credentials were not supplied. Tests inject fixture-only
-HTTP/IMAP transports and exercise the actual gateway, policy, database and receipts.
+A real Gemini proposal and human-approved Razorpay Test Mode refund have been
+verified. IMAP has not been connected to a real mailbox. Automated tests inject
+fixture-only HTTP/IMAP transports and exercise the actual gateway, policy,
+database and receipts; these tests are not live benchmark results.
 
 ## Signed receipts
 
@@ -597,9 +601,11 @@ with actual Git/build provenance and UTC timestamps. Operator-only APIs are
 `GET /v1/eval-runs` and `GET /v1/eval-runs/{id}`. The `/metrics/` page is built from
 `stitch_intentlock_operator_console/metrics_intentlock/`, follows that frontend's
 design and fetches actual persisted history; absent measurements stay unmeasured.
-No live evaluation results are claimed by the code/unit tests. This workspace has
-no Git repository, captured real grants or supplied live service/provider credentials;
-a full live benchmark cannot be truthfully reported until those are provided.
+No full live-suite results are claimed by the code/unit tests. Actual source
+provenance and test-account connectivity now exist, but the full protected capture
+plan, cross-tenant executor evidence and verified webhook history are not yet
+prepared. A readiness census records those blockers without executing financial
+cases or displaying fabricated scores.
 
 ## File map and verification
 
@@ -626,11 +632,16 @@ model adapter has been removed. The worker submits typed proposals to `/v1/propo
 model API or Postgres call was performed during testing. Docker startup remains
 unverified because Engine is unavailable in this environment.
 
-Verified in this workspace: **541 pytest cases passed**, including 106 v1
+Verified in this workspace: **550 pytest cases passed**, including 106 v1
 policy/workflow/authentication tests, plus TypeScript/Vite production build and
 Alembic metadata/Compose configuration checks. The updated console was visually
-checked with honest empty states. Docker Engine and live external payment/model
-providers were not used.
+checked against actual tenant data, including the completed Test Mode refund.
+All three Docker images build successfully; the local stack has passed readiness,
+operator-session and webhook-signature checks using the preserved real ledger.
+A consistent live-volume backup has also passed SQLite integrity verification.
+Inside the final network-disabled API image, 549 tests passed and one
+Docker-CLI-dependent check was skipped; that Compose check passed on the host.
+The full financial evaluation and public HTTPS webhook registration remain pending.
 
 ### Performance and Daybreak
 
@@ -712,3 +723,12 @@ links, invalid model output and unavailable credentials remain explicit failures
 requiring investigation; no amounts, permissions or grants are silently changed.
 The Metrics page still requires real live evaluation runs; one successful demo
 refund is not a completed benchmark suite.
+
+## Local Docker operations
+
+The current Docker UI is at **http://127.0.0.1:8080/**. Gateway, executor, agent
+and reconciler run privately behind the web container. The original native
+SQLite file is retired after cutover; the named ledger volume is authoritative.
+Use the [local Docker runbook](docs/LOCAL_DOCKER.md) for protected configuration,
+volume initialization, readiness, and live-ledger backups. No new refunds are
+issued by deployment checks. The full financial evaluation remains separate.

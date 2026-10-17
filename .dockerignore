@@ -25,3 +25,6 @@ stitch_intentlock_operator_console/*
 IntentLock-source.zip
 
 !stitch_intentlock_operator_console/operator_live/
+
+**/*.sqlite
+**/*.sqlite-*

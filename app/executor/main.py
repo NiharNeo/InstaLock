@@ -3,6 +3,8 @@ from contextlib import asynccontextmanager
 import hashlib
 import hmac
 from typing import Any, AsyncIterator
+from app.api.health import router as health_router
+from sqlalchemy import literal
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
@@ -38,6 +40,7 @@ def create_app(settings: ExecutorSettings | None = None, *, provider: RefundProv
                 adapter.close()
             engine.dispose()
     app=FastAPI(lifespan=lifespan,docs_url=None,redoc_url=None,openapi_url=None,redirect_slashes=False)
+    app.include_router(health_router)
 
     @app.exception_handler(HTTPException)
     async def rejected_route(request: Request, error: HTTPException) -> JSONResponse:
@@ -75,6 +78,12 @@ def create_app(settings: ExecutorSettings | None = None, *, provider: RefundProv
             def handle() -> dict[str,Any]:
                 if webhook:
                     return process_webhook(service,data,raw,request.headers.get('x-razorpay-event-id',''))
+                if request.url.path=='/internal/health':
+                    if data!={}:
+                        raise GatewayDenied('INVALID_REQUEST','executor.health_body',400)
+                    with service.engine.connect() as connection:
+                        connection.execute(select(literal(1)))
+                    return {'status':'ready'}
                 if request.url.path.endswith('/payments/get'):
                     if set(data)!={'tenant_id','payment_id'} or data['tenant_id']!=service.settings.tenant_id:
                         raise GatewayDenied('WRONG_TENANT','executor.payment_scope')
@@ -98,6 +107,11 @@ def create_app(settings: ExecutorSettings | None = None, *, provider: RefundProv
         provider_spans.reset(timing_token)
         status=result.pop('_http_status',200)
         return JSONResponse(result,status_code=status,headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'})
+
+    @app.post('/internal/health')
+    async def internal_health(request: Request) -> JSONResponse:
+        """Authenticate the gateway's readiness probe without contacting the provider."""
+        return await dispatch(request)
 
     @app.post('/internal/payments/get')
     async def get_payment(request: Request) -> JSONResponse:

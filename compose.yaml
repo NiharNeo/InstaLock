@@ -30,6 +30,8 @@ services:
     depends_on:
       migrate:
         condition: service_completed_successfully
+      executor:
+        condition: service_healthy
     command:
     - uvicorn
     - app.main:app
@@ -37,6 +39,16 @@ services:
     - 0.0.0.0
     - --port
     - '8000'
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready',timeout=4).read()
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
   web:
     build:
       context: .
@@ -44,7 +56,10 @@ services:
     ports:
     - 127.0.0.1:8080:8080
     depends_on:
-    - gateway
+      gateway:
+        condition: service_healthy
+      executor:
+        condition: service_healthy
     security_opt:
     - no-new-privileges:true
     cap_drop:
@@ -81,8 +96,8 @@ services:
     volumes: &id002
     - ledger:/data
     - ./policies:/app/policies:ro
-    depends_on: &id003
-      migrate:
+    depends_on:
+      migrate: &id003
         condition: service_completed_successfully
     security_opt: &id004
     - no-new-privileges:true
@@ -97,11 +112,24 @@ services:
     - '8001'
     ports:
     - 127.0.0.1:8001:8001
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/health/ready',timeout=4).read()
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
   reconciler:
     build: .
     environment: *id001
     volumes: *id002
-    depends_on: *id003
+    depends_on:
+      migrate: *id003
+      executor:
+        condition: service_healthy
     security_opt: *id004
     cap_drop: *id005
     command:
@@ -120,7 +148,8 @@ services:
       GEMINI_MODEL: ${GEMINI_MODEL:-}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
     depends_on:
-    - gateway
+      gateway:
+        condition: service_healthy
     read_only: true
     cap_drop:
     - ALL

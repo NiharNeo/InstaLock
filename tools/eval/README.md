@@ -8,7 +8,7 @@ runs. Do not put capture artifacts into source control, a slide deck or an agent
 
 ## Install and configure
 
-Run Alembic 0007 against the same database used by the live gateway/executor, then
+Run Alembic to the latest head against the same database used by the live gateway/executor, then
 restart both services to enable provider span metadata and the Metrics API:
 
 ```sh
@@ -55,8 +55,9 @@ Set EVAL_PROVIDER_COMMANDS with your **actual tenant names** as keys, not copied
 sample identities. `python -m tools.eval schema` prints the plan schema; it does not
 generate sample business data. `schema --capture` prints the capture schema.
 
-This workspace has no Git repository. A real run blocks with GIT_SHA_UNAVAILABLE
-unless actual build provenance is supplied. It never fabricates a Git hash.
+The runner reads the actual Git HEAD, or an explicit actual build SHA when Git
+is unavailable inside a container. Missing provenance blocks a financial suite
+with GIT_SHA_UNAVAILABLE; no Git hash is fabricated.
 
 ## Capture actual tickets and grants
 

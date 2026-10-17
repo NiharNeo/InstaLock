@@ -30,3 +30,6 @@ dist/
 *.textClipping
 
 /web/public/console.css
+
+*.sqlite
+*.sqlite-*
