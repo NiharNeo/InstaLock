@@ -1,0 +1,17 @@
+# Empty until an administrator configures actual tenant permissions and limits.
+schema_version: 1
+default: deny
+rules:
+  tenant_scope: tenant.scope
+  tool_allowlist: tenant.tool_allowlist
+  resource_binding: refund.resource_binding
+  resource_version: refund.resource_version
+  destination: refund.original_destination
+  currency: refund.currency
+  max_refund: refund.per_payment_limit
+  refundable_remaining: refund.remaining_balance
+  one_in_flight: refund.one_in_flight
+  read_scope: tenant.read_scope
+  refund_allow: refund.allow
+  default_deny: policy.default_deny
+tenants: {}

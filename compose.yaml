@@ -1,0 +1,158 @@
+services:
+  gateway:
+    build: .
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?set DATABASE_URL}
+      POLICY_FILE: /app/policies/refunds.yaml
+      GRANT_ISSUER: ${GRANT_ISSUER:?set GRANT_ISSUER}
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:8080}
+      GRANT_PRIVATE_KEY_PEM: ${GRANT_PRIVATE_KEY_PEM:-}
+      GRANT_PRIVATE_KEY_PASSWORD: ${GRANT_PRIVATE_KEY_PASSWORD:-}
+      GRANT_KEY_FILE_MAP: ${GRANT_KEY_FILE_MAP:-}
+      EXECUTOR_URL: http://executor:8001
+      EXECUTOR_AUTH_TOKEN: ${EXECUTOR_AUTH_TOKEN:-}
+      RECEIPT_PRIVATE_KEY_PEM: ${RECEIPT_PRIVATE_KEY_PEM:-}
+      RECEIPT_PRIVATE_KEY_FILE: ${RECEIPT_PRIVATE_KEY_FILE:-}
+      RECEIPT_PRIVATE_KEY_PASSWORD: ${RECEIPT_PRIVATE_KEY_PASSWORD:-}
+      INTAKE_RATE_SECRET: ${INTAKE_RATE_SECRET:-}
+    ports:
+    - 127.0.0.1:8000:8000
+    volumes:
+    - ledger:/data
+    - ./policies:/app/policies:ro
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    command:
+    - uvicorn
+    - app.main:app
+    - --host
+    - 0.0.0.0
+    - --port
+    - '8000'
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    ports:
+    - 127.0.0.1:8080:8080
+    depends_on:
+    - gateway
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
+  migrate:
+    build: .
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?set DATABASE_URL}
+    volumes:
+    - ledger:/data
+    command:
+    - alembic
+    - upgrade
+    - head
+    security_opt:
+    - no-new-privileges:true
+    cap_drop:
+    - ALL
+  executor:
+    build: .
+    environment: &id001
+      DATABASE_URL: ${DATABASE_URL:?set DATABASE_URL}
+      POLICY_FILE: /app/policies/refunds.yaml
+      GRANT_ISSUER: ${GRANT_ISSUER:?set GRANT_ISSUER}
+      EXECUTOR_TENANT_ID: ${EXECUTOR_TENANT_ID:-}
+      RAZORPAY_ACCOUNT_ID: ${RAZORPAY_ACCOUNT_ID:-}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET:-}
+      EXECUTOR_AUTH_TOKEN: ${EXECUTOR_AUTH_TOKEN:-}
+      RECEIPT_PRIVATE_KEY_PEM: ${RECEIPT_PRIVATE_KEY_PEM:-}
+      RECEIPT_PRIVATE_KEY_FILE: ${RECEIPT_PRIVATE_KEY_FILE:-}
+      RECEIPT_PRIVATE_KEY_PASSWORD: ${RECEIPT_PRIVATE_KEY_PASSWORD:-}
+    volumes: &id002
+    - ledger:/data
+    - ./policies:/app/policies:ro
+    depends_on: &id003
+      migrate:
+        condition: service_completed_successfully
+    security_opt: &id004
+    - no-new-privileges:true
+    cap_drop: &id005
+    - ALL
+    command:
+    - uvicorn
+    - app.executor.main:app
+    - --host
+    - 0.0.0.0
+    - --port
+    - '8001'
+    ports:
+    - 127.0.0.1:8001:8001
+  reconciler:
+    build: .
+    environment: *id001
+    volumes: *id002
+    depends_on: *id003
+    security_opt: *id004
+    cap_drop: *id005
+    command:
+    - python
+    - -m
+    - app.executor.reconcile
+  agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    profiles:
+    - agent
+    environment:
+      GATEWAY_URL: http://gateway:8000
+      AGENT_SERVICE_KEY: ${AGENT_SERVICE_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    depends_on:
+    - gateway
+    read_only: true
+    cap_drop:
+    - ALL
+    security_opt:
+    - no-new-privileges:true
+    restart: on-failure
+  imap:
+    build: .
+    profiles:
+    - imap
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?set DATABASE_URL}
+      POLICY_FILE: /app/policies/refunds.yaml
+      RECEIPT_PRIVATE_KEY_PEM: ${RECEIPT_PRIVATE_KEY_PEM:-}
+      RECEIPT_PRIVATE_KEY_FILE: ${RECEIPT_PRIVATE_KEY_FILE:-}
+      RECEIPT_PRIVATE_KEY_PASSWORD: ${RECEIPT_PRIVATE_KEY_PASSWORD:-}
+      IMAP_HOST: ${IMAP_HOST:-}
+      IMAP_PORT: ${IMAP_PORT:-993}
+      IMAP_USERNAME: ${IMAP_USERNAME:-}
+      IMAP_PASSWORD: ${IMAP_PASSWORD:-}
+      IMAP_MAILBOX: ${IMAP_MAILBOX:-}
+      IMAP_CHANNEL_ID: ${IMAP_CHANNEL_ID:-}
+    volumes:
+    - ledger:/data
+    - ./policies:/app/policies:ro
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    command:
+    - python
+    - -m
+    - app.intake.imap
+    cap_drop:
+    - ALL
+    security_opt:
+    - no-new-privileges:true
+volumes:
+  ledger: null

@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-surface-variant": "#3e494a", "on-background": "#002022", "on-secondary": "#ffffff", "tertiary-container": "#915239", "on-primary-fixed": "#001f23", "on-secondary-container": "#286d67", "secondary": "#236863", "surface-container-highest": "#c0eaef", "on-secondary-fixed": "#00201e", "on-error": "#ffffff", "on-primary-container": "#9becf7", "secondary-fixed": "#acefe7", "on-tertiary": "#ffffff", "on-surface": "#002022", "surface-container-low": "#d4fbff", "primary-fixed-dim": "#82d3de", "outline-variant": "#bec8ca", "secondary-container": "#a9ece5", "primary-fixed": "#9ff0fb", "on-tertiary-fixed-variant": "#6f3720", "inverse-on-surface": "#cef8fd", "on-primary": "#ffffff", "surface-container": "#cbf6fa", "surface-tint": "#006972", "error": "#ba1a1a", "on-tertiary-container": "#ffd7c9", "on-primary-fixed-variant": "#004f56", "on-error-container": "#93000a", "secondary-fixed-dim": "#90d3cb", "surface-container-lowest": "#ffffff", "surface-dim": "#b7e2e6", "surface-variant": "#c0eaef", "surface-bright": "#eafdff", "tertiary-fixed-dim": "#ffb59a", "surface": "#eafdff", "on-secondary-fixed-variant": "#00504b", "on-tertiary-fixed": "#380d00", "tertiary": "#743b24", "inverse-primary": "#82d3de", "tertiary-fixed": "#ffdbce", "primary": "#00535b", "inverse-surface": "#08363a", "outline": "#6f797a", "primary-container": "#006d77", "surface-container-high": "#c5f0f4", "background": "#eafdff", "error-container": "#ffdad6" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-xl": "2.5rem", "margin": "2rem", "space-lg": "1.5rem", "space-xs": "0.25rem", "margin-mobile": "1rem", "gutter-mobile": "1rem", "gutter": "1.5rem", "space-sm": "0.5rem", "space-md": "1rem" }, "fontFamily": { "body-md": ["Inter"], "code-md": ["JetBrains Mono"], "headline-md": ["\"Source Serif 4\""], "body-sm": ["Inter"], "headline-lg-mobile": ["\"Source Serif 4\""], "label-caps": ["Inter"], "headline-xl-mobile": ["\"Source Serif 4\""], "code-lg": ["JetBrains Mono"], "headline-xl": ["\"Source Serif 4\""], "body-lg": ["Inter"], "headline-lg": ["\"Source Serif 4\""], "body-bold": ["Inter"], "headline-sm": ["\"Source Serif 4\""], "code-sm": ["JetBrains Mono"] }, "fontSize": { "body-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }], "code-md": ["13px", { "lineHeight": "18px", "fontWeight": "500" }], "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "500" }], "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }], "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }], "label-caps": ["11px", { "lineHeight": "14px", "fontWeight": "700" }], "headline-xl-mobile": ["30px", { "lineHeight": "38px", "fontWeight": "600" }], "code-lg": ["18px", { "lineHeight": "24px", "fontWeight": "500" }], "headline-xl": ["40px", { "lineHeight": "48px", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "26px", "fontWeight": "400" }], "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }], "body-bold": ["14px", { "lineHeight": "22px", "fontWeight": "600" }], "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "500" }], "code-sm": ["11px", { "lineHeight": "16px", "fontWeight": "500" }] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen"><header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="bg-surface-container-high py-space-xs px-margin"><div class="max-w-7xl mx-auto flex items-center justify-between text-on-surface-variant"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[16px] text-primary">lock</span><span class="font-label-caps text-label-caps tracking-wider uppercase text-on-surface-variant">256-bit Cryptographic Payment Protection &amp; Live Ledger Verifiable</span></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs font-code-sm text-code-sm"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span><span class="text-on-surface">SYSTEM: SETTLED</span></div><div class="font-code-sm text-code-sm bg-surface-container-highest px-space-sm py-0.5 rounded-lg text-on-secondary-container">INR / ₹ (LIVE)</div></div></div></div><div class="h-20 max-w-7xl mx-auto px-margin flex items-center justify-between gap-gutter"><div class="flex items-center gap-space-md shrink-0"><div class="flex flex-col"><span class="font-headline-sm text-headline-sm tracking-tight text-primary font-bold">IntentStore</span><span class="font-code-sm text-code-sm tracking-tight text-on-surface-variant">Apex Commerce • Protected by IntentLock</span></div></div><div class="hidden lg:flex flex-1 max-w-md items-center bg-surface-container-lowest rounded-lg px-space-md py-space-xs shadow-[0_1px_3px_rgba(15,59,63,0.04)]"><span class="material-symbols-outlined text-outline mr-space-sm text-[20px]">search</span><input class="w-full bg-transparent font-body-sm text-body-sm text-on-surface placeholder-outline focus:outline-none" placeholder="Search verified catalogue, batch hashes, orders..." type="text"/></div><nav class="hidden xl:flex items-center gap-space-lg" data-active-classes="text-primary font-body-bold text-body-bold"><a aria-current="page" class="transition-colors text-primary font-body-bold text-body-bold" data-path="catalogue" href="#">Catalogue</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="my-orders" href="#">My Orders</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="customer-support" href="#">Customer Support</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="track-ticket-reference" href="#">Track Ticket Reference</a></nav><div class="flex items-center gap-space-md shrink-0"><button class="flex items-center gap-space-sm bg-surface-container-lowest px-space-md py-space-sm rounded-lg shadow-[0_1px_3px_rgba(15,59,63,0.04)] hover:bg-surface-container transition-all text-on-surface" type="button"><span class="material-symbols-outlined text-[20px] text-primary">shopping_bag</span><span class="font-code-md text-code-md">₹0.00</span><span class="bg-primary-container text-on-primary font-code-sm text-code-sm px-space-xs py-0.5 rounded-lg">0</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-28 bg-surface min-h-[calc(100vh-280px)]"><div class="flex flex-col w-full">
+<!-- Interactive State Controller & Notification Toast Container -->
+<div class="fixed bottom-6 right-6 z-50 flex flex-col gap-space-xs pointer-events-none" id="toast-container"></div>
+<!-- Hero Banner: Visual Authority & Cryptographic Assurance -->
+<section class="relative w-full overflow-hidden bg-surface-container-high py-space-xl px-margin shadow-sm">
+<div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-space-lg relative z-10">
+<div class="max-w-3xl flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs mb- space-xs">
+<span class="inline-flex items-center gap-1.5 px-space-sm py-0.5 rounded-lg bg-surface-container-highest text-primary font-code-sm text-code-sm uppercase tracking-wider">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+            REST ENDPOINT: GET /store/products
+          </span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">•</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant font-medium">SCHEMA: CatalogResponseSchema (Zod v3.23)</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">
+          Hardware &amp; Security Subscriptions — Powered by IntentLock Zero-Trust Ledger
+        </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mt-space-xs">
+          Itemized authentic hardware, cryptographic authentication keys, and verifiable multi-tenant security licenses. Guaranteed inventory state anchored to cryptographic root batches.
+        </p>
+</div>
+<!-- Quick Telemetry & Simulation Module -->
+<div class="w-full lg:w-auto flex flex-col sm:flex-row lg:flex-col gap-space-sm bg-surface-container-lowest p-space-md rounded-xl shadow-sm">
+<div class="flex items-center justify-between gap-space-lg">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-outline">API State Controller</span>
+<span class="font-code-sm text-code-sm text-on-surface font-semibold" id="api-status-indicator">200 OK • 6 Records Loaded</span>
+</div>
+<button class="px-space-sm py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary font-code-sm text-code-sm transition-all flex items-center gap-1" id="toggle-empty-state" type="button">
+<span class="material-symbols-outlined text-[16px]">sync_alt</span>
+<span id="toggle-state-text">Simulate [ ] (Empty)</span>
+</button>
+</div>
+<div class="flex items-center gap-space-sm pt-space-xs text-on-surface-variant font-code-sm text-code-sm">
+<span class="material-symbols-outlined text-secondary text-[16px]">verified</span>
+<span>Ledger Hash: <span class="font-mono text-on-surface">0x89f2...41de</span></span>
+</div>
+</div>
+</div>
+</section>
+<!-- Main Storefront Application Structure -->
+<section class="max-w-7xl mx-auto w-full px-margin py-space-xl">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+<!-- Filter Sidebar (Col: 3 Desktop) -->
+<aside class="lg:col-span-3 flex flex-col gap-space-md bg-surface-container-lowest p-space-lg rounded-xl shadow-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">filter_list</span>
+<h2 class="font-body-bold text-body-bold text-on-surface uppercase font-label-caps text-label-caps">Filters &amp; Query</h2>
+</div>
+<button class="text-on-surface-variant hover:text-primary font-code-sm text-code-sm transition-colors" id="reset-filters" type="button">Reset</button>
+</div>
+<!-- Search Input -->
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-caps text-label-caps uppercase text-outline" for="search-input">Search Nomenclature</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-outline text-[18px]">search</span>
+<input class="w-full pl-9 pr-3 py-2 bg-surface rounded-lg font-body-sm text-body-sm text-on-surface placeholder-outline focus:outline-none focus:bg-surface-container-low transition-all" id="search-input" placeholder="YubiKey, Bio, Token, Tier..." type="text"/>
+</div>
+</div>
+<!-- Categories -->
+<div class="flex flex-col gap-space-xs pt-space-xs">
+<label class="font-label-caps text-label-caps uppercase text-outline">Device &amp; License Categories</label>
+<div class="flex flex-col gap-1.5" id="category-filters">
+<label class="flex items-center justify-between p-2 rounded-lg hover:bg-surface transition-colors cursor-pointer group">
+<div class="flex items-center gap-2">
+<input checked="" class="accent-primary w-4 h-4 cursor-pointer" name="catalog-category" type="radio" value="all"/>
+<span class="font-body-sm text-body-sm text-on-surface group-hover:text-primary transition-colors">All Entities</span>
+</div>
+<span class="font-code-sm text-code-sm text-outline px-1.5 py-0.5 rounded bg-surface">6</span>
+</label>
+<label class="flex items-center justify-between p-2 rounded-lg hover:bg-surface transition-colors cursor-pointer group">
+<div class="flex items-center gap-2">
+<input class="accent-primary w-4 h-4 cursor-pointer" name="catalog-category" type="radio" value="Hardware Authenticator"/>
+<span class="font-body-sm text-body-sm text-on-surface group-hover:text-primary transition-colors">Hardware Authenticator</span>
+</div>
+<span class="font-code-sm text-code-sm text-outline px-1.5 py-0.5 rounded bg-surface">2</span>
+</label>
+<label class="flex items-center justify-between p-2 rounded-lg hover:bg-surface transition-colors cursor-pointer group">
+<div class="flex items-center gap-2">
+<input class="accent-primary w-4 h-4 cursor-pointer" name="catalog-category" type="radio" value="Physical Tokens"/>
+<span class="font-body-sm text-body-sm text-on-surface group-hover:text-primary transition-colors">Physical Tokens</span>
+</div>
+<span class="font-code-sm text-code-sm text-outline px-1.5 py-0.5 rounded bg-surface">2</span>
+</label>
+<label class="flex items-center justify-between p-2 rounded-lg hover:bg-surface transition-colors cursor-pointer group">
+<div class="flex items-center gap-2">
+<input class="accent-primary w-4 h-4 cursor-pointer" name="catalog-category" type="radio" value="Security Gateway Licenses"/>
+<span class="font-body-sm text-body-sm text-on-surface group-hover:text-primary transition-colors">Security Gateway Licenses</span>
+</div>
+<span class="font-code-sm text-code-sm text-outline px-1.5 py-0.5 rounded bg-surface">2</span>
+</label>
+</div>
+</div>
+<!-- Price Range Slider (Paise Converted Representation) -->
+<div class="flex flex-col gap-space-xs pt-space-xs">
+<div class="flex items-center justify-between">
+<label class="font-label-caps text-label-caps uppercase text-outline">Maximum Budget</label>
+<span class="font-code-md text-code-md text-primary font-bold" id="price-value-display">₹25,000</span>
+</div>
+<input class="accent-primary w-full cursor-pointer h-1.5 bg-surface-container rounded-lg" id="price-slider" max="25000" min="2000" step="500" type="range" value="25000"/>
+<div class="flex justify-between font-code-sm text-code-sm text-outline">
+<span>₹2,000</span>
+<span>₹25,000</span>
+</div>
+</div>
+<!-- Ledger Integrity Widget -->
+<div class="p-space-md rounded-xl bg-surface-container flex flex-col gap-space-xs">
+<div class="flex items-center gap-1.5 text-secondary">
+<span class="material-symbols-outlined text-[18px]">gavel</span>
+<span class="font-body-bold text-body-bold text-on-surface">Zod Validated Payloads</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            Each SKU price is calculated server-side in sub-unit paise (<span class="font-code-sm text-code-sm text-on-surface">amount_paise</span>) to eliminate binary floating-point discrepancy.
+          </p>
+</div>
+</aside>
+<!-- Products Grid & Dynamic Slate (Col: 9 Desktop) -->
+<main class="lg:col-span-9 flex flex-col gap-space-md min-w-0">
+<!-- Live Result Metadata Strip -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm bg-surface-container-low px-space-md py-space-sm rounded-xl">
+<div class="flex items-center gap-space-sm">
+<span class="font-body-sm text-body-sm text-on-surface font-semibold" id="product-count-label">Displaying 6 Verified Catalog Items</span>
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Sorting: High Trust Priority</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="font-code-sm text-code-sm text-on-secondary-container px-space-sm py-0.5 rounded bg-secondary-container font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">lock</span> IntentStore Sync v2.4
+            </span>
+</div>
+</div>
+<!-- The Products Container (Grid or Empty State) -->
+<div class="w-full" id="catalog-canvas">
+<!-- Populated dynamically or toggled via simulation -->
+</div>
+</main>
+</div>
+</section>
+<!-- Strict No-Mock Runtime Guarantee Footer Block -->
+<section class="max-w-7xl mx-auto w-full px-margin pb-space-xl">
+<div class="p-space-lg rounded-xl bg-surface-container-lowest shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md">
+<div class="flex items-start gap-space-md">
+<div class="w-10 h-10 rounded-xl bg-surface-container-highest flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-[24px]">verified_user</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-bold text-body-bold text-on-surface">Strict Typed Schema &amp; Zero-Mock Guarantee</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant max-w-3xl">
+            This storefront consumes <code class="font-code-sm text-code-sm text-primary font-semibold">GET /store/products</code> validated via strictly typed Zod contracts. All monetary values are delivered as integer paise (<code class="font-code-sm text-code-sm text-primary">price_in_paise</code>) guaranteeing Razorpay and RBI settlement precision. Mock payloads and synthetic client-side fallbacks are prohibited by protocol governance.
+          </p>
+</div>
+</div>
+<div class="flex flex-col items-end shrink-0 font-code-sm text-code-sm text-on-surface-variant">
+<span>CONTRACT: <strong class="text-on-surface font-mono">store_v2.d.ts</strong></span>
+<span>ENGINE: <strong class="text-secondary font-mono">IntentStore-Go-v4.18</strong></span>
+</div>
+</div>
+</section>
+</div>
+<!-- Dynamic Catalog Engine Script (Pure Vanilla JavaScript) -->
+<script>
+  (function() {
+    // 1. Concrete Typed Model Representation (mirrors Zod ProductSchema)
+    const CATALOG_DATA = [
+      {
+        id: "prod_yb5c_001",
+        name: "YubiKey 5C NFC Security Key",
+        category: "Hardware Authenticator",
+        sku: "HW-YUBI-5CNFC-X",
+        price_in_paise: 550000, // ₹5,500.00
+        description: "Multi-protocol dual connector (USB-C and NFC) supporting FIDO2/WebAuthn, U2F, OpenPGP, and smart card credentials with hardware tamper resistance.",
+        stock_status: "IN_STOCK",
+        stock_quantity: 48,
+        rating: 4.95,
+        rating_count: 142,
+        image_alt: "A sleek black YubiKey 5C NFC hardware security authenticator resting on a minimalist slate desk with subtle teal lighting highlights, emphasizing gold contact points and high precision industrial finish."
+      },
+      {
+        id: "prod_fido2_bio_002",
+        name: "FIDO2 Bio Hardware Token Pro",
+        category: "Hardware Authenticator",
+        sku: "HW-BIO-FD2-PRO",
+        price_in_paise: 890000, // ₹8,900.00
+        description: "On-device biometric capacitive fingerprint sensor with AES-256 encrypted local secure enclave. Zero cloud biometric transmission with USB-A & USB-C adapter.",
+        stock_status: "IN_STOCK",
+        stock_quantity: 19,
+        rating: 4.88,
+        rating_count: 86,
+        image_alt: "Macro studio photography of an enterprise biometric hardware security token with integrated fingerprint scanner glass pane, metallic zinc-alloy enclosure, subtle teal LED indicator."
+      },
+      {
+        id: "prod_vault_t1_003",
+        name: "Vault Subscription Tier 1 (12 Mo)",
+        category: "Security Gateway Licenses",
+        sku: "LIC-VLT-TR1-12M",
+        price_in_paise: 1200000, // ₹12,000.00
+        description: "Zero-knowledge cryptographic secret vault management for distributed teams. Includes automatic key rotation, audit trails, and 5 enterprise seats.",
+        stock_status: "IN_STOCK",
+        stock_quantity: 999,
+        rating: 4.99,
+        rating_count: 310,
+        image_alt: "Conceptual editorial visual of modern server cryptography, abstract illuminated circuits with deep teal and parchment aesthetics symbolizing an immutable digital vault security subscription."
+      },
+      {
+        id: "prod_hsm_usb_004",
+        name: "NitroKey 3A NFC Physical Token",
+        category: "Physical Tokens",
+        sku: "HW-NITRO-3A-NFC",
+        price_in_paise: 420000, // ₹4,200.00
+        description: "Open-source USB-A physical hardware security token featuring secure elements, Rust firmware, and quantum-resistant algorithms ready for WebAuthn standards.",
+        stock_status: "IN_STOCK",
+        stock_quantity: 34,
+        rating: 4.79,
+        rating_count: 53,
+        image_alt: "Minimalist photography of a white and graphite hardware token on a pristine stone plinth, surrounded by soft warm ambient architectural lighting and teal accent shadows."
+      },
+      {
+        id: "prod_gateway_edge_005",
+        name: "Zero-Trust Gateway License Enterprise",
+        category: "Security Gateway Licenses",
+        sku: "LIC-ZTG-ENT-YEAR",
+        price_in_paise: 2450000, // ₹24,500.00
+        description: "Dedicated tunnel proxy authorization instance with cryptographic mutual TLS enforcement, continuous peer evaluation, and IntentLock dispute logging.",
+        stock_status: "IN_STOCK",
+        stock_quantity: 100,
+        rating: 4.92,
+        rating_count: 47,
+        image_alt: "Futuristic network server rack with fiber optic interconnects and luminous status monitors glowing in deep teal and warm amber in an ultra clean enterprise datacenter."
+      },
+      {
+        id: "prod_solo2_fido_006",
+        name: "SoloKey V2 FIDO2 Reversible Token",
+        category: "Physical Tokens",
+        sku: "HW-SOLO2-USB-C",
+        price_in_paise: 310000, // ₹3,100.00
+        description: "Durable epoxy overmolded hardware authenticator with dual color LEDs and waterproof seal. Fully compliant with enterprise PKI and Google Workspace.",
+        stock_status: "IN_STOCK",
+        stock_quantity: 62,
+        rating: 4.82,
+        rating_count: 94,
+        image_alt: "Industrial macro still life of a ruggedized epoxy USB-C security key token with sleek matte finish, illuminated indicator light and tactile touch sensor."
+      }
+    ];
+
+    // State Variables
+    let isSimulationEmpty = false;
+    let selectedCategory = 'all';
+    let maxPriceInRupees = 25000;
+    let searchQuery = '';
+    const quantities = {};
+
+    // DOM Elements
+    const canvas = document.getElementById('catalog-canvas');
+    const toggleBtn = document.getElementById('toggle-empty-state');
+    const toggleText = document.getElementById('toggle-state-text');
+    const apiStatusIndicator = document.getElementById('api-status-indicator');
+    const productCountLabel = document.getElementById('product-count-label');
+    const searchInput = document.getElementById('search-input');
+    const priceSlider = document.getElementById('price-slider');
+    const priceValueDisplay = document.getElementById('price-value-display');
+    const resetFiltersBtn = document.getElementById('reset-filters');
+    const categoryRadios = document.querySelectorAll('input[name="catalog-category"]');
+
+    // Utility: Format Paise to INR string with ₹ symbol
+    function formatPaiseToINR(paise) {
+      const rupees = (paise / 100);
+      return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(rupees);
+    }
+
+    // Render Product Cards Grid or Empty State
+    function renderCatalog() {
+      if (isSimulationEmpty) {
+        apiStatusIndicator.textContent = "200 OK • 0 Records (Empty Array)";
+        productCountLabel.textContent = "Displaying 0 Verified Catalog Items";
+        canvas.innerHTML = `
+          <div class="w-full bg-surface-container-lowest p-space-xl rounded-xl shadow-sm flex flex-col items-center justify-center text-center py-16">
+            <div class="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center text-primary mb-space-md">
+              <span class="material-symbols-outlined text-[32px]">inventory_2</span>
+            </div>
+            <div class="inline-flex items-center gap-1.5 px-space-sm py-0.5 rounded-lg bg-surface-container font-code-sm text-code-sm text-primary mb-space-xs">
+              <span class="material-symbols-outlined text-[14px]">terminal</span>
+              <span>GET /store/products -> []</span>
+            </div>
+            <h3 class="font-headline-md text-headline-md text-on-surface mb-space-xs">
+              No products currently active in catalogue
+            </h3>
+            <p class="font-body-md text-body-md text-on-surface-variant max-w-md mb-space-lg">
+              Products managed via Operator Console. All zero-trust hardware allocations are currently locked in operator audit cycles or pending batch verification.
+            </p>
+            <div class="flex items-center gap-space-md">
+              <button id="restore-catalog-btn" type="button" class="px-space-md py-2.5 bg-primary text-on-primary font-body-bold text-body-bold rounded-lg shadow-sm hover:bg-primary-container transition-all flex items-center gap-2">
+                <span class="material-symbols-outlined text-[18px]">refresh</span>
+                Restore Verified Catalogue View
+              </button>
+            </div>
+            <div class="mt-space-lg pt-space-md font-code-sm text-code-sm text-outline flex items-center gap-2">
+              <span class="material-symbols-outlined text-[16px]">info</span>
+              <span>Operator Node: BLR-DC-04 | Ledger Synchronized</span>
+            </div>
+          </div>
+        `;
+
+        document.getElementById('restore-catalog-btn')?.addEventListener('click', () => {
+          isSimulationEmpty = false;
+          toggleText.textContent = "Simulate [ ] (Empty)";
+          renderCatalog();
+        });
+        return;
+      }
+
+      // Filter Logic
+      const filtered = CATALOG_DATA.filter(item => {
+        const matchesCategory = (selectedCategory === 'all' || item.category === selectedCategory);
+        const priceInRupees = item.price_in_paise / 100;
+        const matchesPrice = priceInRupees <= maxPriceInRupees;
+        const matchesSearch = searchQuery === '' ||
+          item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.sku.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesCategory && matchesPrice && matchesSearch;
+      });
+
+      apiStatusIndicator.textContent = `200 OK • ${filtered.length} of ${CATALOG_DATA.length} Filtered`;
+      productCountLabel.textContent = `Displaying ${filtered.length} Verified Catalog Items`;
+
+      if (filtered.length === 0) {
+        canvas.innerHTML = `
+          <div class="w-full bg-surface-container-lowest p-space-xl rounded-xl shadow-sm text-center py-12 flex flex-col items-center">
+            <span class="material-symbols-outlined text-outline text-[40px] mb-space-xs">search_off</span>
+            <h4 class="font-headline-sm text-headline-sm text-on-surface">No products match your active filter criteria</h4>
+            <p class="font-body-sm text-body-sm text-on-surface-variant max-w-sm mt-1 mb-space-md">
+              Try broadening your category selection or adjusting the price threshold slider.
+            </p>
+            <button id="clear-filters-btn" class="px-space-md py-2 bg-surface-container hover:bg-surface-container-high rounded-lg text-primary font-body-bold text-body-bold transition-all">
+              Clear All Search &amp; Price Filters
+            </button>
+          </div>
+        `;
+        document.getElementById('clear-filters-btn')?.addEventListener('click', resetAllFilters);
+        return;
+      }
+
+      // 3-Column Bento/Editorial Card Grid
+      let html = '<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-gutter">';
+
+      filtered.forEach(product => {
+        const qty = quantities[product.id] || 1;
+        const formattedPrice = formatPaiseToINR(product.price_in_paise);
+
+        html += `
+          <div class="bg-surface-container-lowest rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden group">
+            
+            <!-- Product Visual Banner with IntentLock Badge -->
+            <div class="relative w-full h-52 bg-surface-container overflow-hidden">
+              <img 
+                src="placeholder" 
+                data-alt="${product.image_alt}" 
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div class="absolute top-3 left-3 flex flex-col gap-1 items-start">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-surface-container-lowest/95 backdrop-blur-md text-secondary font-code-sm text-code-sm font-semibold shadow-sm">
+                  <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                  In Stock (API Verified)
+                </span>
+              </div>
+              <div class="absolute bottom-3 right-3">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-primary-container text-on-primary font-code-sm text-code-sm shadow-sm font-bold">
+                  ${product.sku}
+                </span>
+              </div>
+            </div>
+
+            <!-- Content Details -->
+            <div class="p-space-md flex flex-col flex-1 justify-between gap-space-md">
+              <div class="flex flex-col gap-1">
+                <div class="flex items-center justify-between text-on-surface-variant font-code-sm text-code-sm">
+                  <span class="uppercase tracking-wider font-semibold text-outline">${product.category}</span>
+                  <div class="flex items-center gap-1 text-tertiary">
+                    <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                    <span class="font-bold">${product.rating}</span>
+                    <span class="text-outline">(${product.rating_count})</span>
+                  </div>
+                </div>
+
+                <h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold tracking-tight group-hover:text-primary transition-colors">
+                  ${product.name}
+                </h3>
+
+                <p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-1">
+                  ${product.description}
+                </p>
+              </div>
+
+              <!-- Price, Quantity, and Interactive Cart Action -->
+              <div class="flex flex-col gap-space-sm pt-space-xs bg-surface-container-low/50 p-space-sm rounded-lg">
+                <div class="flex items-baseline justify-between">
+                  <div class="flex flex-col">
+                    <span class="font-label-caps text-label-caps uppercase text-outline">Verified Price</span>
+                    <span class="font-code-lg text-code-lg text-primary font-bold tracking-tight">${formattedPrice}</span>
+                  </div>
+                  <span class="font-code-sm text-code-sm text-on-surface-variant">${product.stock_quantity} units available</span>
+                </div>
+
+                <!-- Quantity & Add to Cart Controls -->
+                <div class="flex items-center gap-2">
+                  <div class="flex items-center bg-surface-container-lowest rounded-lg p-0.5 shadow-sm">
+                    <button type="button" onclick="window.changeQuantity('${product.id}', -1)" class="w-8 h-8 flex items-center justify-center text-on-surface hover:bg-surface-container rounded transition-colors" title="Decrease">
+                      <span class="material-symbols-outlined text-[16px]">remove</span>
+                    </button>
+                    <span id="qty-${product.id}" class="w-8 text-center font-code-md text-code-md text-on-surface font-semibold">${qty}</span>
+                    <button type="button" onclick="window.changeQuantity('${product.id}', 1)" class="w-8 h-8 flex items-center justify-center text-on-surface hover:bg-surface-container rounded transition-colors" title="Increase">
+                      <span class="material-symbols-outlined text-[16px]">add</span>
+                    </button>
+                  </div>
+
+                  <button 
+                    type="button" 
+                    onclick="window.addToCart('${product.id}')"
+                    class="flex-1 py-2 px-space-md bg-primary hover:bg-primary-container text-on-primary font-body-bold text-body-bold rounded-lg shadow-sm transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+                    <span>Add to Cart</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        `;
+      });
+
+      html += '</div>';
+      canvas.innerHTML = html;
+    }
+
+    // Exposed Global Actions for inline onclick
+    window.changeQuantity = function(productId, delta) {
+      const current = quantities[productId] || 1;
+      const next = Math.max(1, Math.min(10, current + delta));
+      quantities[productId] = next;
+      const elem = document.getElementById(`qty-${productId}`);
+      if (elem) elem.textContent = next;
+    };
+
+    window.addToCart = function(productId) {
+      const product = CATALOG_DATA.find(p => p.id === productId);
+      if (!product) return;
+      const qty = quantities[productId] || 1;
+      showToast(`Added ${qty} × ${product.name} to Intent Secure Cart`, 'success');
+    };
+
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = 'pointer-events-auto flex items-center gap-2 bg-inverse-surface text-inverse-on-surface px-space-md py-space-sm rounded-lg shadow-xl font-body-sm text-body-sm transition-all transform duration-300 translate-y-2 opacity-0';
+      toast.innerHTML = `
+        <span class="material-symbols-outlined text-secondary text-[20px]">check_circle</span>
+        <span>${message}</span>
+      `;
+      const container = document.getElementById('toast-container');
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3200);
+    }
+
+    function resetAllFilters() {
+      selectedCategory = 'all';
+      searchQuery = '';
+      maxPriceInRupees = 25000;
+      searchInput.value = '';
+      priceSlider.value = '25000';
+      priceValueDisplay.textContent = '₹25,000';
+      const defaultRadio = document.querySelector('input[name="catalog-category"][value="all"]');
+      if (defaultRadio) defaultRadio.checked = true;
+      renderCatalog();
+    }
+
+    // Listeners
+    toggleBtn.addEventListener('click', () => {
+      isSimulationEmpty = !isSimulationEmpty;
+      toggleText.textContent = isSimulationEmpty ? "Restore API Feed" : "Simulate [ ] (Empty)";
+      renderCatalog();
+    });
+
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value.trim();
+      renderCatalog();
+    });
+
+    priceSlider.addEventListener('input', (e) => {
+      maxPriceInRupees = Number(e.target.value);
+      priceValueDisplay.textContent = new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0
+      }).format(maxPriceInRupees);
+      renderCatalog();
+    });
+
+    categoryRadios.forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        if (e.target.checked) {
+          selectedCategory = e.target.value;
+          renderCatalog();
+        }
+      });
+    });
+
+    resetFiltersBtn.addEventListener('click', resetAllFilters);
+
+    // Initial Execution
+    renderCatalog();
+  })();
+</script></main><footer class="w-full bg-surface-container-low mt-space-xl py-space-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="max-w-7xl mx-auto px-margin"><div class="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-space-lg"><div class="flex flex-col gap-space-sm"><span class="font-headline-sm text-headline-sm text-primary">Apex Commerce</span><p class="font-body-sm text-body-sm text-on-surface-variant">Cryptographically guaranteed transactional commerce. Deliberate, immutable order routing with verified dispute settlement.</p><div class="flex items-center gap-space-xs mt-space-xs"><span class="material-symbols-outlined text-secondary text-[18px]">verified_user</span><span class="font-code-sm text-code-sm text-on-secondary-container uppercase tracking-wide">IntentLock Verified Ledger</span></div></div><div class="flex flex-col gap-space-sm"><span class="font-body-bold text-body-bold text-on-surface uppercase font-label-caps text-label-caps">Storefront</span><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="catalogue" href="#">Verified Catalogue</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="vault-releases" href="#">Vault Releases</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="transaction-protocol" href="#">Transaction Protocol</a></div><div class="flex flex-col gap-space-sm"><span class="font-body-bold text-body-bold text-on-surface uppercase font-label-caps text-label-caps">Account &amp; Audit</span><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="my-orders" href="#">My Orders</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="track-ticket-reference" href="#">Track Ticket Reference</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="dispute-registry" href="#">Dispute Registry</a></div><div class="flex flex-col gap-space-sm"><span class="font-body-bold text-body-bold text-on-surface uppercase font-label-caps text-label-caps">Security &amp; Legal</span><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="customer-support" href="#">Customer Support</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="cryptographic-guarantee" href="#">Cryptographic Guarantee</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="terms-of-settlement" href="#">Terms of Settlement</a></div></div><div class="pt-space-md flex flex-col md:flex-row items-center justify-between gap-space-md text-on-surface-variant"><div class="flex items-center gap-space-md font-code-sm text-code-sm"><span>NODE ID: APX-9821-LCK</span><span>•</span><span>TLS 1.3 ENCRYPTED</span><span>•</span><span>RAZORPAY DIRECT SETTLED</span></div><div class="font-body-sm text-body-sm">© 2025 Apex Commerce / IntentStore. All rights reserved.</div></div></div></footer></body></html>

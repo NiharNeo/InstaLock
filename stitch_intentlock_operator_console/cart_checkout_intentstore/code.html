@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-surface-variant": "#3e494a", "on-background": "#002022", "on-secondary": "#ffffff", "tertiary-container": "#915239", "on-primary-fixed": "#001f23", "on-secondary-container": "#286d67", "secondary": "#236863", "surface-container-highest": "#c0eaef", "on-secondary-fixed": "#00201e", "on-error": "#ffffff", "on-primary-container": "#9becf7", "secondary-fixed": "#acefe7", "on-tertiary": "#ffffff", "on-surface": "#002022", "surface-container-low": "#d4fbff", "primary-fixed-dim": "#82d3de", "outline-variant": "#bec8ca", "secondary-container": "#a9ece5", "primary-fixed": "#9ff0fb", "on-tertiary-fixed-variant": "#6f3720", "inverse-on-surface": "#cef8fd", "on-primary": "#ffffff", "surface-container": "#cbf6fa", "surface-tint": "#006972", "error": "#ba1a1a", "on-tertiary-container": "#ffd7c9", "on-primary-fixed-variant": "#004f56", "on-error-container": "#93000a", "secondary-fixed-dim": "#90d3cb", "surface-container-lowest": "#ffffff", "surface-dim": "#b7e2e6", "surface-variant": "#c0eaef", "surface-bright": "#eafdff", "tertiary-fixed-dim": "#ffb59a", "surface": "#eafdff", "on-secondary-fixed-variant": "#00504b", "on-tertiary-fixed": "#380d00", "tertiary": "#743b24", "inverse-primary": "#82d3de", "tertiary-fixed": "#ffdbce", "primary": "#00535b", "inverse-surface": "#08363a", "outline": "#6f797a", "primary-container": "#006d77", "surface-container-high": "#c5f0f4", "background": "#eafdff", "error-container": "#ffdad6" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-xl": "2.5rem", "margin": "2rem", "space-lg": "1.5rem", "space-xs": "0.25rem", "margin-mobile": "1rem", "gutter-mobile": "1rem", "gutter": "1.5rem", "space-sm": "0.5rem", "space-md": "1rem" }, "fontFamily": { "body-md": ["Inter"], "code-md": ["JetBrains Mono"], "headline-md": ["\"Source Serif 4\""], "body-sm": ["Inter"], "headline-lg-mobile": ["\"Source Serif 4\""], "label-caps": ["Inter"], "headline-xl-mobile": ["\"Source Serif 4\""], "code-lg": ["JetBrains Mono"], "headline-xl": ["\"Source Serif 4\""], "body-lg": ["Inter"], "headline-lg": ["\"Source Serif 4\""], "body-bold": ["Inter"], "headline-sm": ["\"Source Serif 4\""], "code-sm": ["JetBrains Mono"] }, "fontSize": { "body-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }], "code-md": ["13px", { "lineHeight": "18px", "fontWeight": "500" }], "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "500" }], "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }], "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }], "label-caps": ["11px", { "lineHeight": "14px", "fontWeight": "700" }], "headline-xl-mobile": ["30px", { "lineHeight": "38px", "fontWeight": "600" }], "code-lg": ["18px", { "lineHeight": "24px", "fontWeight": "500" }], "headline-xl": ["40px", { "lineHeight": "48px", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "26px", "fontWeight": "400" }], "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }], "body-bold": ["14px", { "lineHeight": "22px", "fontWeight": "600" }], "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "500" }], "code-sm": ["11px", { "lineHeight": "16px", "fontWeight": "500" }] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen"><header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="bg-surface-container-high py-space-xs px-margin"><div class="max-w-7xl mx-auto flex items-center justify-between text-on-surface-variant"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[16px] text-primary">lock</span><span class="font-label-caps text-label-caps tracking-wider uppercase text-on-surface-variant">256-bit Cryptographic Payment Protection &amp; Live Ledger Verifiable</span></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs font-code-sm text-code-sm"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span><span class="text-on-surface">SYSTEM: SETTLED</span></div><div class="font-code-sm text-code-sm bg-surface-container-highest px-space-sm py-0.5 rounded-lg text-on-secondary-container">INR / ₹ (LIVE)</div></div></div></div><div class="h-20 max-w-7xl mx-auto px-margin flex items-center justify-between gap-gutter"><div class="flex items-center gap-space-md shrink-0"><div class="flex flex-col"><span class="font-headline-sm text-headline-sm tracking-tight text-primary font-bold">IntentStore</span><span class="font-code-sm text-code-sm tracking-tight text-on-surface-variant">Apex Commerce • Protected by IntentLock</span></div></div><div class="hidden lg:flex flex-1 max-w-md items-center bg-surface-container-lowest rounded-lg px-space-md py-space-xs shadow-[0_1px_3px_rgba(15,59,63,0.04)]"><span class="material-symbols-outlined text-outline mr-space-sm text-[20px]">search</span><input class="w-full bg-transparent font-body-sm text-body-sm text-on-surface placeholder-outline focus:outline-none" placeholder="Search verified catalogue, batch hashes, orders..." type="text"/></div><nav class="hidden xl:flex items-center gap-space-lg" data-active-classes="text-primary font-body-bold text-body-bold"><a aria-current="page" class="transition-colors text-primary font-body-bold text-body-bold" data-path="catalogue" href="#">Catalogue</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="my-orders" href="#">My Orders</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="customer-support" href="#">Customer Support</a><a class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors" data-path="track-ticket-reference" href="#">Track Ticket Reference</a></nav><div class="flex items-center gap-space-md shrink-0"><button class="flex items-center gap-space-sm bg-surface-container-lowest px-space-md py-space-sm rounded-lg shadow-[0_1px_3px_rgba(15,59,63,0.04)] hover:bg-surface-container transition-all text-on-surface" type="button"><span class="material-symbols-outlined text-[20px] text-primary">shopping_bag</span><span class="font-code-md text-code-md">₹0.00</span><span class="bg-primary-container text-on-primary font-code-sm text-code-sm px-space-xs py-0.5 rounded-lg">0</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-28 bg-surface min-h-[calc(100vh-280px)]"><div class="flex flex-col w-full">
+<section class="max-w-7xl mx-auto px-margin w-full pb-space-xl">
+<!-- Breadcrumb & Integrity Banner -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm mb-space-md">
+<div class="flex items-center gap-space-xs font-code-sm text-code-sm text-on-surface-variant">
+<span>STORE</span>
+<span>/</span>
+<span>CART</span>
+<span>/</span>
+<span class="text-primary font-bold">CRYPTO-INTENT CHECKOUT</span>
+</div>
+<div class="flex items-center gap-space-sm bg-surface-container-high px-space-md py-1 rounded-full shadow-sm">
+<span class="material-symbols-outlined text-[15px] text-secondary">verified</span>
+<span class="font-code-sm text-code-sm text-on-surface">SESSION NONCE: 0x88e7f...3b1a</span>
+<span class="text-outline">|</span>
+<span class="font-code-sm text-code-sm text-primary font-medium">SERVER AUTHORITY COMPUTED</span>
+</div>
+</div>
+<!-- Page Header (Typography Overlap & Subtitle) -->
+<div class="mb-space-lg">
+<p class="font-label-caps text-label-caps uppercase tracking-wider text-secondary mb-1">Stateful Settlement Layer</p>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Checkout &amp; Cryptographic Lock</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl mt-1">Review ledger allocations, dispatch coordinates, and trigger the immutable Razorpay gateway payload. All tax calculations are authoritative on node APX-9821.</p>
+</div>
+<!-- Alert / Incident Simulator banner (Rate limit / Timeout toggleable trigger) -->
+<div class="hidden mb-space-lg p-space-md bg-error-container text-on-error-container rounded-xl shadow-md transition-all" id="error-callout">
+<div class="flex items-start gap-space-md">
+<span class="material-symbols-outlined text-error text-[24px] mt-0.5">warning</span>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<h4 class="font-body-bold text-body-bold text-on-error-container">HTTP 429: Cryptographic Transaction Rate Exceeded</h4>
+<span class="font-code-sm text-code-sm uppercase bg-error/10 px-2 py-0.5 rounded">Retry After: 28s</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-error-container/90 mt-1">The local consensus engine throttled rapid re-submissions for nonce <code class="font-code-sm text-code-sm">0x88e7f...3b1a</code>. If payment gateway timeout occurred, verify authorization status in Dispute Registry before re-initiating.</p>
+<div class="mt-space-sm flex gap-space-md">
+<button class="font-code-sm text-code-sm font-semibold underline hover:opacity-80" id="dismiss-error">Dismiss Notice</button>
+<button class="font-code-sm text-code-sm font-semibold underline hover:opacity-80" id="resync-telemetry">Re-query Gateway Ledger</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Master 8:4 Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+<!-- LEFT COLUMN: Cart Items & Coordinates (8 cols) -->
+<div class="lg:col-span-8 flex flex-col gap-space-lg">
+<!-- Cart Items Review Table -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm">
+<div class="flex items-center justify-between pb-space-md mb-space-md bg-surface-container-low -mx-space-lg -mt-space-lg px-space-lg pt-space-md rounded-t-xl">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[20px]">inventory_2</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Verified Cart Items</span>
+</div>
+<span class="font-code-sm text-code-sm bg-surface-container px-space-sm py-1 rounded text-on-surface font-medium">BATCH REF: #VLT-0982-IN</span>
+</div>
+<!-- Items Listing -->
+<div class="space-y-space-md">
+<!-- Item 1 -->
+<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-md p-space-sm bg-surface-container-low/40 rounded-lg hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-space-md">
+<img class="w-16 h-16 rounded-lg object-cover bg-surface-container-highest shrink-0 shadow-sm" data-alt="Close up photograph of a minimalist matte dark teal titanium cryptographic key fob resting on clean architectural ivory linen stone pedestal with dramatic studio rim light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRxwo9fPCaWZ4Z8e12LizytQnvoNvaJS772T-3nIFe4wWjClfxY0rPPqsNomlt_R-YGFk4yjL9KJYxaunZpZgjQhJaSiJ0jvXdLGVGXUc6Ah_uV-lgXyYVMRdXwiQzEP6yeQWD9zPUc0SDYBTXdZ6d7DLB915LvEsuY-HTh8w9FUEq8e-5PnY8UeSkSYddbxQHpGsf6um2gNA6P4J3oJHqlh4GXEUUK7HnCtUZozI9bKONx_4SuJu5uA"/>
+<div>
+<h3 class="font-body-bold text-body-bold text-on-surface">Apex Hardware Signer V3 (Titanium)</h3>
+<div class="flex items-center gap-space-xs font-code-sm text-code-sm text-on-surface-variant mt-0.5">
+<span>SKU: APX-HS-01</span>
+<span>•</span>
+<span class="text-secondary font-medium">Air-gapped</span>
+</div>
+</div>
+</div>
+<div class="flex sm:flex-col items-end justify-between w-full sm:w-auto">
+<span class="font-code-md text-code-md text-on-surface font-semibold">₹6,500.00</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Qty: 01</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-md p-space-sm bg-surface-container-low/40 rounded-lg hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-space-md">
+<img class="w-16 h-16 rounded-lg object-cover bg-surface-container-highest shrink-0 shadow-sm" data-alt="Premium engraved black steel seed phrase storage plate with cold industrial lighting and fine micro metallic textures on deep aquatic parchment background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnsLF0yce6SITrQHKv6QZrgVBzCPjhy-gB_dvunx80qtMYmomBihztkM1gcZrTomdwIKkl0hHMLiQEw3t7POU5VeRIon-VlyZjgLOfhMs8hED2IjKaiqHyAGPNMP_YBRG0k30TlLyKRPPDIxRDrzh11Sre7M5SdwJMvXYCV4pnaUA8PMJhWIUTuquDlqLQBfWlrbuyam_ONf5eSQMia2HGX46NA5L7NkPVwPon2bfj81J2YDgOTnCIFg"/>
+<div>
+<h3 class="font-body-bold text-body-bold text-on-surface">Steel Seed Storage Matrix (Dual-Plate)</h3>
+<div class="flex items-center gap-space-xs font-code-sm text-code-sm text-on-surface-variant mt-0.5">
+<span>SKU: APX-SSM-02</span>
+<span>•</span>
+<span class="text-secondary font-medium">Grade 304 Steel</span>
+</div>
+</div>
+</div>
+<div class="flex sm:flex-col items-end justify-between w-full sm:w-auto">
+<span class="font-code-md text-code-md text-on-surface font-semibold">₹2,500.00</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Qty: 01</span>
+</div>
+</div>
+</div>
+<!-- Server Computed Pricing Breakdown -->
+<div class="mt-space-lg bg-surface-container-low p-space-md rounded-xl">
+<div class="flex items-center justify-between pb-space-sm mb-space-sm bg-surface-container-high/40 -mx-space-md -mt-space-md px-space-md pt-space-sm rounded-t-xl">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Server Side Ledger Assessment</span>
+<span class="font-code-sm text-code-sm text-secondary font-semibold">HASH: c0a8010...7f3</span>
+</div>
+<div class="space-y-space-xs text-on-surface font-body-sm text-body-sm">
+<div class="flex justify-between">
+<span class="text-on-surface-variant">Gross Line Items Total</span>
+<span class="font-code-sm text-code-sm">₹9,000.00</span>
+</div>
+<div class="flex justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="text-on-surface-variant">Goods &amp; Services Tax (Integrated GST 18%)</span>
+<span class="material-symbols-outlined text-outline text-[14px]">info</span>
+</div>
+<span class="font-code-sm text-code-sm">₹1,620.00</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface-variant">Direct Secure Transit (Insured Priority)</span>
+<span class="font-code-sm text-code-sm text-secondary font-semibold">₹0.00 (FREE)</span>
+</div>
+</div>
+<div class="mt-space-md pt-space-sm flex justify-between items-center bg-surface-container-highest/60 p-space-sm rounded-lg">
+<div>
+<span class="font-body-bold text-body-bold text-on-surface">Total Authorized Amount</span>
+<span class="block font-code-sm text-code-sm text-on-surface-variant">Authoritative non-negotiable payload</span>
+</div>
+<span class="font-code-lg text-code-lg text-primary font-bold">₹10,620.00</span>
+</div>
+</div>
+</div>
+<!-- Dispatch & Billing Coordinates Form -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm">
+<div class="flex items-center justify-between mb-space-md">
+<div>
+<span class="font-label-caps text-label-caps uppercase text-secondary">Party Identification</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Shipping &amp; Billing Coordinates</h3>
+</div>
+<span class="material-symbols-outlined text-secondary">local_shipping</span>
+</div>
+<form class="space-y-space-md" id="shipping-form" onsubmit="event.preventDefault();">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<div class="flex flex-col gap-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase" for="customer-email">Email Notification Endpoint</label>
+<div class="flex items-center bg-surface-container-low rounded-lg px-space-md py-space-xs">
+<span class="material-symbols-outlined text-outline text-[18px] mr-space-sm">alternate_email</span>
+<input class="w-full bg-transparent font-body-sm text-body-sm text-on-surface focus:outline-none" id="customer-email" required="" type="email" value="arun.iyer@apexvault.in"/>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase" for="customer-phone">Secure SMS / Phone (for OTP)</label>
+<div class="flex items-center bg-surface-container-low rounded-lg px-space-md py-space-xs">
+<span class="font-code-sm text-code-sm text-on-surface-variant mr-space-sm">+91</span>
+<input class="w-full bg-transparent font-body-sm text-body-sm text-on-surface focus:outline-none" id="customer-phone" required="" type="tel" value="9876543210"/>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase" for="delivery-address">Destination Delivery Address</label>
+<textarea class="w-full bg-surface-container-low rounded-lg px-space-md py-space-sm font-body-sm text-body-sm text-on-surface focus:outline-none" id="delivery-address" required="" rows="2">Plot 42, Cyber Gateway Enclave, Whitefield, Bengaluru, Karnataka, 560066</textarea>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<div class="flex flex-col gap-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase">City</label>
+<input class="bg-surface-container-low rounded-lg px-space-md py-space-xs font-body-sm text-body-sm text-on-surface focus:outline-none" readonly="" type="text" value="Bengaluru"/>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase">State</label>
+<input class="bg-surface-container-low rounded-lg px-space-md py-space-xs font-body-sm text-body-sm text-on-surface focus:outline-none" readonly="" type="text" value="Karnataka (KA)"/>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase">PIN / Zip Code</label>
+<input class="bg-surface-container-low rounded-lg px-space-md py-space-xs font-body-sm text-body-sm text-on-surface focus:outline-none" readonly="" type="text" value="560066"/>
+</div>
+</div>
+<!-- Verification Checkpoint toggle -->
+<div class="pt-space-xs flex items-center justify-between text-on-surface-variant">
+<label class="flex items-center gap-space-sm cursor-pointer">
+<input checked="" class="rounded bg-surface-container text-primary focus:ring-0 w-4 h-4" type="checkbox"/>
+<span class="font-body-sm text-body-sm">Same address for tax invoice issuance</span>
+</label>
+<button class="font-code-sm text-code-sm text-outline hover:text-error transition-colors underline" id="trigger-rate-error" type="button">Simulate 429 Gateway Rate Limit</button>
+</div>
+</form>
+</div>
+</div>
+<!-- RIGHT COLUMN: Payment Simulator & Security Architecture (4 cols) -->
+<div class="lg:col-span-4 flex flex-col gap-space-lg">
+<!-- Sticky Authorization Panel -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-md flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-sm">
+<span class="font-headline-sm text-headline-sm text-primary font-bold">Settlement Suite</span>
+<div class="flex items-center gap-1 bg-surface-container px-2 py-0.5 rounded-full">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+<span class="font-code-sm text-code-sm text-secondary font-bold">RAZORPAY TEST</span>
+</div>
+</div>
+<!-- Step 1: Order Creation status -->
+<div class="bg-surface-container-low p-space-md rounded-xl space-y-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-on-surface font-semibold">Step 1: Order Intent Created</span>
+<span class="material-symbols-outlined text-secondary text-[18px]">check_circle</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Payload negotiated via <code class="font-code-sm text-code-sm text-primary font-bold">POST /store/orders</code></p>
+<div class="bg-surface-container-high p-space-sm rounded font-code-sm text-code-sm text-on-surface break-all flex items-center justify-between">
+<span id="order-id-label">order_Nz91ka83bLq</span>
+<button class="text-primary hover:text-secondary flex items-center gap-0.5 ml-2 shrink-0" id="copy-order-btn">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+</button>
+</div>
+<div class="flex justify-between font-code-sm text-code-sm text-on-surface-variant pt-1">
+<span>Currency: INR (356)</span>
+<span>Units: 1062000 paise</span>
+</div>
+</div>
+<!-- Step 2: Razorpay Test Mode Checkout Details -->
+<div class="bg-surface-container-high/40 p-space-md rounded-xl space-y-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-on-surface font-semibold">Step 2: Modal Preview</span>
+<span class="font-code-sm text-code-sm text-outline">rzp_test_public_key</span>
+</div>
+<div class="bg-surface-container-lowest p-space-sm rounded-lg shadow-inner">
+<div class="flex items-center gap-space-sm mb-space-xs pb-space-xs bg-surface-container-low -mx-space-sm -mt-space-sm p-space-xs rounded-t-lg">
+<span class="material-symbols-outlined text-primary text-[16px]">credit_card</span>
+<span class="font-code-sm text-code-sm font-bold text-on-surface">Test Credential Helper</span>
+</div>
+<div class="space-y-1 font-code-sm text-code-sm text-on-surface-variant">
+<div class="flex justify-between">
+<span>Standard Test Card:</span>
+<span class="font-bold text-on-surface">4111 1111 1111 1111</span>
+</div>
+<div class="flex justify-between">
+<span>Expiry / CVV:</span>
+<span class="font-bold text-on-surface">12/28 • 123</span>
+</div>
+<div class="flex justify-between">
+<span>OTP Bypass:</span>
+<span class="text-secondary font-bold">Any 6-digit numeric</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Master Action Trigger Button -->
+<div class="pt-space-xs">
+<button class="w-full bg-primary hover:bg-surface-tint active:bg-inverse-surface text-on-primary py-space-md px-space-lg rounded-xl font-body-bold text-body-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-space-sm group" id="open-razorpay-btn" type="button">
+<span class="material-symbols-outlined text-[20px] group-hover:rotate-12 transition-transform">lock</span>
+<span>Pay ₹10,620.00 with Razorpay (Test Mode)</span>
+</button>
+<p class="font-code-sm text-code-sm text-center text-on-surface-variant mt-2">Zero zero fee settlement • Instant lock guarantee</p>
+</div>
+<!-- Step 3: Security & Verification Contract Notice -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm">
+<div class="flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-secondary text-[20px] shrink-0 mt-0.5">security</span>
+<div>
+<span class="font-label-caps text-label-caps uppercase text-secondary block font-bold">Step 3: Verification Protocol</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 leading-relaxed">
+                  Browser never computes amount or payment status. Payment signature <code class="font-code-sm text-code-sm text-on-surface bg-surface-container px-1 py-0.5 rounded">razorpay_signature</code> verified via <code class="font-code-sm text-code-sm text-primary font-bold">POST /store/payments/verify</code> before order confirmation.
+                </p>
+</div>
+</div>
+<div class="mt-space-md pt-space-sm flex items-center justify-between text-on-surface-variant font-code-sm text-code-sm">
+<span class="flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                HMAC-SHA256 SECURED
+              </span>
+<span>APX-ENGINE 4.2</span>
+</div>
+</div>
+<!-- Trust Badges & Telemetry Bar -->
+<div class="flex items-center justify-around py-space-sm bg-surface-container-low rounded-xl">
+<div class="flex flex-col items-center">
+<span class="material-symbols-outlined text-primary text-[20px]">enhanced_encryption</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant mt-1">PCI-DSS L1</span>
+</div>
+<div class="w-px h-6 bg-outline-variant/40"></div>
+<div class="flex flex-col items-center">
+<span class="material-symbols-outlined text-secondary text-[20px]">receipt_long</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant mt-1">GST COMPLIANT</span>
+</div>
+<div class="w-px h-6 bg-outline-variant/40"></div>
+<div class="flex flex-col items-center">
+<span class="material-symbols-outlined text-tertiary text-[20px]">gavel</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant mt-1">APEX DISPUTE</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Razorpay Modal Simulator (Iframe Mock Scrim Overlay) -->
+<div class="fixed inset-0 z-50 bg-inverse-surface/60 backdrop-blur-sm hidden items-center justify-center p-space-md transition-opacity" id="razorpay-modal">
+<div class="bg-surface-container-lowest w-full max-w-lg rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+<!-- Razorpay Header Simulator -->
+<div class="bg-primary p-space-lg text-on-primary flex items-start justify-between">
+<div>
+<div class="flex items-center gap-space-xs font-code-sm text-code-sm text-on-primary-container uppercase font-semibold">
+<span>RAZORPAY SECURE GATEWAY</span>
+<span>•</span>
+<span class="bg-surface-container-lowest/20 px-1.5 py-0.5 rounded text-[10px]">TEST MODE</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-primary mt-1">Apex Commerce Node</h2>
+<p class="font-code-sm text-code-sm text-on-primary/80">Ref: order_Nz91ka83bLq</p>
+</div>
+<div class="text-right">
+<span class="font-code-lg text-code-lg font-bold text-on-primary block">₹10,620.00</span>
+<button class="mt-2 text-on-primary/80 hover:text-on-primary" id="close-modal-btn">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+</div>
+<!-- Razorpay Body Simulator -->
+<div class="p-space-lg space-y-space-md">
+<div class="flex items-center justify-between pb-space-sm bg-surface-container-low px-space-md py-space-sm rounded-lg">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-secondary">credit_card</span>
+<span class="font-body-bold text-body-bold text-on-surface">Payment Options</span>
+</div>
+<span class="font-code-sm text-code-sm text-on-surface-variant">Cards / UPI / NetBanking</span>
+</div>
+<div class="space-y-space-sm">
+<div class="p-space-md rounded-xl bg-surface-container-low/60 flex items-center justify-between cursor-pointer hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-space-md">
+<span class="material-symbols-outlined text-primary text-[24px]">payment</span>
+<div>
+<span class="font-body-bold text-body-bold text-on-surface block">Pre-filled Test Card</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant">•••• •••• •••• 1111 (Visa / Rupay)</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary text-[20px]">radio_button_checked</span>
+</div>
+<div class="p-space-md rounded-xl bg-surface-container-lowest flex items-center justify-between text-on-surface-variant opacity-60">
+<div class="flex items-center gap-space-md">
+<span class="material-symbols-outlined text-[24px]">account_balance</span>
+<span class="font-body-md text-body-md">Instant UPI / QR Code</span>
+</div>
+<span class="material-symbols-outlined text-[20px]">radio_button_unchecked</span>
+</div>
+</div>
+<!-- Verification Flow Explainer -->
+<div class="p-space-sm bg-surface-container rounded-lg font-code-sm text-code-sm text-on-surface-variant space-y-1">
+<div class="flex items-center justify-between text-primary font-semibold">
+<span>DISPATCH TARGET:</span>
+<span>/store/payments/verify</span>
+</div>
+<p>Upon click, standard callback creates cryptographic mock: <code class="text-on-surface">razorpay_payment_id: pay_Nx9847L1a</code></p>
+</div>
+<!-- Simulator Action -->
+<div class="pt-space-sm flex gap-space-md">
+<button class="flex-1 bg-secondary hover:bg-on-secondary-container text-on-secondary py-space-md rounded-xl font-body-bold text-body-bold shadow-md transition-all flex items-center justify-center gap-space-xs" id="simulate-success-btn">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Simulate Success &amp; Verify</span>
+</button>
+<button class="bg-surface-container-high hover:bg-surface-container-highest text-error py-space-md px-space-md rounded-xl font-body-bold text-body-bold transition-all" id="simulate-failure-btn">
+            Simulate Timeout
+          </button>
+</div>
+</div>
+<!-- Razorpay Footer Strip -->
+<div class="bg-surface-container-low px-space-lg py-space-xs flex items-center justify-between text-on-surface-variant font-code-sm text-code-sm">
+<span>Public Key: rzp_test_public_key</span>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-secondary text-[14px]">lock</span>
+<span>End-to-End Encrypted</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Success Notification Toast -->
+<div class="fixed bottom-8 right-8 z-50 bg-primary text-on-primary p-space-md rounded-xl shadow-xl hidden items-center gap-space-md max-w-md animate-in slide-in-from-bottom duration-300" id="success-toast">
+<div class="w-10 h-10 rounded-full bg-secondary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-secondary text-[22px]">check</span>
+</div>
+<div>
+<h4 class="font-body-bold text-body-bold">Payment Verified Server-Side</h4>
+<p class="font-body-sm text-body-sm text-on-primary-container">Order order_Nz91ka83bLq confirmed via HMAC token verification.</p>
+</div>
+<button class="text-on-primary/60 hover:text-on-primary ml-auto" id="close-toast-btn">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<!-- Client-side Interactive Behaviors -->
+<script>
+    (function initCheckoutInteractions() {
+      const openModalBtn = document.getElementById('open-razorpay-btn');
+      const closeModalBtn = document.getElementById('close-modal-btn');
+      const modal = document.getElementById('razorpay-modal');
+      const simulateSuccessBtn = document.getElementById('simulate-success-btn');
+      const simulateFailureBtn = document.getElementById('simulate-failure-btn');
+      const errorCallout = document.getElementById('error-callout');
+      const dismissErrorBtn = document.getElementById('dismiss-error');
+      const triggerRateErrorBtn = document.getElementById('trigger-rate-error');
+      const successToast = document.getElementById('success-toast');
+      const closeToastBtn = document.getElementById('close-toast-btn');
+      const copyOrderBtn = document.getElementById('copy-order-btn');
+      const orderIdLabel = document.getElementById('order-id-label');
+
+      // Modal Open/Close
+      if (openModalBtn && modal) {
+        openModalBtn.addEventListener('click', () => {
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+        });
+      }
+
+      if (closeModalBtn && modal) {
+        closeModalBtn.addEventListener('click', () => {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        });
+      }
+
+      // Success Simulation
+      if (simulateSuccessBtn && modal && successToast) {
+        simulateSuccessBtn.addEventListener('click', () => {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+          successToast.classList.remove('hidden');
+          successToast.classList.add('flex');
+          
+          if (errorCallout) {
+            errorCallout.classList.add('hidden');
+          }
+        });
+      }
+
+      // Failure/Timeout Simulation
+      if (simulateFailureBtn && modal && errorCallout) {
+        simulateFailureBtn.addEventListener('click', () => {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+          errorCallout.classList.remove('hidden');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }
+
+      // Dismiss Error Callout
+      if (dismissErrorBtn && errorCallout) {
+        dismissErrorBtn.addEventListener('click', () => {
+          errorCallout.classList.add('hidden');
+        });
+      }
+
+      // Trigger Rate Limit Error Directly
+      if (triggerRateErrorBtn && errorCallout) {
+        triggerRateErrorBtn.addEventListener('click', () => {
+          errorCallout.classList.remove('hidden');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }
+
+      // Close Success Toast
+      if (closeToastBtn && successToast) {
+        closeToastBtn.addEventListener('click', () => {
+          successToast.classList.add('hidden');
+          successToast.classList.remove('flex');
+        });
+      }
+
+      // Copy Order ID
+      if (copyOrderBtn && orderIdLabel) {
+        copyOrderBtn.addEventListener('click', () => {
+          navigator.clipboard.writeText(orderIdLabel.textContent.trim()).then(() => {
+            const icon = copyOrderBtn.querySelector('span');
+            if (icon) {
+              icon.textContent = 'done';
+              setTimeout(() => {
+                icon.textContent = 'content_copy';
+              }, 1800);
+            }
+          });
+        });
+      }
+    })();
+  </script>
+</div></main><footer class="w-full bg-surface-container-low mt-space-xl py-space-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="max-w-7xl mx-auto px-margin"><div class="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-space-lg"><div class="flex flex-col gap-space-sm"><span class="font-headline-sm text-headline-sm text-primary">Apex Commerce</span><p class="font-body-sm text-body-sm text-on-surface-variant">Cryptographically guaranteed transactional commerce. Deliberate, immutable order routing with verified dispute settlement.</p><div class="flex items-center gap-space-xs mt-space-xs"><span class="material-symbols-outlined text-secondary text-[18px]">verified_user</span><span class="font-code-sm text-code-sm text-on-secondary-container uppercase tracking-wide">IntentLock Verified Ledger</span></div></div><div class="flex flex-col gap-space-sm"><span class="font-body-bold text-body-bold text-on-surface uppercase font-label-caps text-label-caps">Storefront</span><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="catalogue" href="#">Verified Catalogue</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="vault-releases" href="#">Vault Releases</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="transaction-protocol" href="#">Transaction Protocol</a></div><div class="flex flex-col gap-space-sm"><span class="font-body-bold text-body-bold text-on-surface uppercase font-label-caps text-label-caps">Account &amp; Audit</span><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="my-orders" href="#">My Orders</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="track-ticket-reference" href="#">Track Ticket Reference</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="dispute-registry" href="#">Dispute Registry</a></div><div class="flex flex-col gap-space-sm"><span class="font-body-bold text-body-bold text-on-surface uppercase font-label-caps text-label-caps">Security &amp; Legal</span><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="customer-support" href="#">Customer Support</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="cryptographic-guarantee" href="#">Cryptographic Guarantee</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="terms-of-settlement" href="#">Terms of Settlement</a></div></div><div class="pt-space-md flex flex-col md:flex-row items-center justify-between gap-space-md text-on-surface-variant"><div class="flex items-center gap-space-md font-code-sm text-code-sm"><span>NODE ID: APX-9821-LCK</span><span>•</span><span>TLS 1.3 ENCRYPTED</span><span>•</span><span>RAZORPAY DIRECT SETTLED</span></div><div class="font-body-sm text-body-sm">© 2025 Apex Commerce / IntentStore. All rights reserved.</div></div></div></footer></body></html>
