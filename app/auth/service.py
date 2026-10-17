@@ -2,6 +2,7 @@
 from __future__ import annotations
 import hashlib
 import hmac
+import os
 import re
 import secrets
 import time
@@ -79,7 +80,13 @@ def check_origin(request: Request, origin: str) -> None:
 def check_csrf(request: Request, supplied: str, row: OperatorSession, origin: str) -> None:
     """Validate a high-entropy CSRF secret bound to this exact authenticated session."""
     check_origin(request,origin)
-    if not supplied or not hmac.compare_digest(secret_hash(supplied),row.csrf_hash):
+    if supplied and hmac.compare_digest(secret_hash(supplied),row.csrf_hash):
+        return
+    try:
+        derived=session_csrf(row.id)
+    except (KeyError,ValueError):
+        derived=None
+    if not supplied or derived is None or not hmac.compare_digest(derived,supplied):
         raise GatewayDenied('CSRF_INVALID','auth.csrf')
 
 
@@ -122,3 +129,11 @@ def provision_session(session: Session, operator_id: str, kid: str, ttl: int) ->
     session.add(OperatorSession(id=secret_hash(token),user_id=user.id,tenant_id=user.tenant_id,signing_kid=kid,csrf_hash=secret_hash(csrf),active=True,expires_at=int(time.time())+ttl))
     session.flush()
     return token, csrf
+
+
+def session_csrf(session_id: str) -> str:
+    """Derive a stable session-bound CSRF token with a dedicated deployment HMAC secret."""
+    secret=os.environ['SESSION_CSRF_SECRET']
+    if len(secret)<32:
+        raise ValueError('strong dedicated session CSRF secret required')
+    return hmac.new(secret.encode(),('intentlock-session-csrf-v1:'+session_id).encode(),hashlib.sha256).hexdigest()

@@ -25,7 +25,7 @@ from app.core.orchestrator import RefundOrchestrator
 from app.core.keys import load_private_key_for_kid
 from app.core.policy import PaymentSnapshot, PolicyEngine
 from app.core.receipts import append_receipt
-from intentlock.db import Execution, OperatorSession, Proposal, ProposalPreview, Receipt, UsedGrant
+from intentlock.db import ApprovalDispatch, Execution, OperatorSession, Proposal, ProposalPreview, Receipt, UsedGrant
 
 
 class ExecuteRequest(_Contract):
@@ -152,12 +152,25 @@ class Gateway:
             result = {'allowed':True,'reason':'PREVIEW_READY','rule_id':decision.rule_id,'policy_version':self.policy.policy_version,'proposal_id':proposal_id,'action':action.model_dump(mode='json'),'action_digest':digest(action),'preview':{'payment_id':resource.payment_id,'order_id':resource.order_id,'amount_paise':action.args.amount_paise,'currency':resource.currency,'destination':'original_payment','original_payment_destination':resource.original_destination,'order_version':resource.order_version,'remaining_refundable_paise':resource.remaining_refundable_paise},'receipt_id':receipt_id}
         return result
 
-    def approve(self, request: Request, raw: bytes, proposal_id: str, data: Any) -> dict[str,Any]:
+    def approve(self, request: Request, raw: bytes, proposal_id: str, data: Any, *, deliver: bool = False) -> dict[str,Any]:
         """Re-fetch, recompute, require the viewed effect, and issue consent atomically."""
         with Session(self.engine) as session, session.begin():
             human = authenticate_operator(session,request,csrf=True,origin=self.settings.origin)
             ApproveRequest.model_validate(data)
             row,action = self._proposal(session,proposal_id,human.tenant_id)
+            cipher=None
+            if deliver:
+                if self.executor is None:
+                    raise GatewayDenied('EXECUTOR_UNAVAILABLE','dispatch.required',503)
+                from app.core.dispatch import load_dispatch_cipher
+                try:
+                    cipher=load_dispatch_cipher()
+                except Exception:
+                    raise GatewayDenied('DISPATCH_UNAVAILABLE','dispatch.required',503) from None
+                prior=session.get(ApprovalDispatch,proposal_id)
+                if prior is not None:
+                    receipt_id=self.audit(session,raw,'DISPATCH_ALREADY_QUEUED','dispatch.idempotency',True,action=action,request_id=proposal_id)
+                    return {'allowed':True,'reason':'DISPATCH_ALREADY_QUEUED','proposal_id':proposal_id,'dispatch_status':prior.status,'operation_id':prior.operation_id,'receipt_id':receipt_id,'_http_status':202}
             if row.status != 'PENDING':
                 raise GatewayDenied('PROPOSAL_ALREADY_APPROVED','proposal.pending')
             resource = self._resource(session,action,human.tenant_id,for_update=True)
@@ -179,7 +192,14 @@ class Gateway:
             if changed.rowcount != 1:
                 raise GatewayDenied('PROPOSAL_ALREADY_APPROVED','proposal.pending')
             receipt_id = self.audit(session,raw,'APPROVED','approval.human_consent',True,action=action,request_id=proposal_id)
+            if deliver:
+                assert cipher is not None
+                now=int(time.time())
+                session.add(ApprovalDispatch(proposal_id=proposal_id,tenant_id=human.tenant_id,token_ciphertext=cipher.encrypt(token.encode()).decode(),idempotency_key='approval-'+grant.id,status='QUEUED',reason='APPROVED',operation_id=None,created_at=now,next_attempt_at=now,lease_owner=None,lease_until=None))
             result = {'allowed':True,'reason':'APPROVED','rule_id':'approval.human_consent','policy_version':self.policy.policy_version,'proposal_id':proposal_id,'grant_token':token,'action_digest':action_hash,'expires_at':grant.payload['exp'],'receipt_id':receipt_id}
+            if deliver:
+                result.pop('grant_token')
+                result.update(dispatch_status='QUEUED',_http_status=202)
         return result
 
     def execute(self, request: Request, raw: bytes, data: Any) -> dict[str,Any]:

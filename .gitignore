@@ -24,3 +24,9 @@ dist/
 *.pfx
 *.log
 /IntentLock-source.zip
+
+/.runtime/
+
+*.textClipping
+
+/web/public/console.css

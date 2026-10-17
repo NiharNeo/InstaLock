@@ -19,3 +19,9 @@ stitch_intentlock_operator_console/*
 !web/tsconfig.json
 .eval-private/
 **/*.grant
+
+.runtime/
+*.textClipping
+IntentLock-source.zip
+
+!stitch_intentlock_operator_console/operator_live/

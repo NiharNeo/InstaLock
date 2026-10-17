@@ -30,6 +30,7 @@ class Order(Base):
 class Ticket(Base):
     """Untrusted customer text with trusted order association."""
     __tablename__ = 'tickets'
+    __table_args__=(Index('ix_tickets_tenant_id','tenant_id','id'),)
     id: Mapped[str] = mapped_column(String(128), primary_key=True)
     tenant_id: Mapped[str] = mapped_column(String(128))
     order_id: Mapped[str | None] = mapped_column(ForeignKey('orders.id'),nullable=True)
@@ -149,6 +150,7 @@ class OperatorSession(Base):
 class Proposal(Base):
     """Stored strictly validated proposal, bound to its submitting agent tenant."""
     __tablename__ = 'proposals'
+    __table_args__=(Index('ix_proposals_tenant_created','tenant_id','created_at','id'),)
     id: Mapped[str] = mapped_column(String(128), primary_key=True)
     tenant_id: Mapped[str] = mapped_column(String(128))
     service_id: Mapped[str] = mapped_column(ForeignKey('agent_service_keys.id'))
@@ -189,7 +191,7 @@ class Resource(Base):
 class Operation(Base):
     """Durable external refund intent, provider identity, lease and terminal result."""
     __tablename__ = 'operations'
-    __table_args__ = (UniqueConstraint('tenant_id','idempotency_key',name='uq_operations_tenant_key'),CheckConstraint("status IN ('PENDING','DONE','FAILED')"))
+    __table_args__ = (UniqueConstraint('tenant_id','idempotency_key',name='uq_operations_tenant_key'),CheckConstraint("status IN ('PENDING','DONE','FAILED')"),Index('ix_operations_tenant_created','tenant_id','created_at','id'))
     id: Mapped[str] = mapped_column(String(128), primary_key=True)
     tenant_id: Mapped[str] = mapped_column(String(128))
     service_id: Mapped[str] = mapped_column(ForeignKey('agent_service_keys.id'))
@@ -248,6 +250,7 @@ class IntakeRate(Base):
 class ModelCall(Base):
     """Bounded model telemetry only: never prompts, outputs or customer text."""
     __tablename__='model_calls'
+    __table_args__=(Index('ix_model_calls_tenant_created','tenant_id','created_at','id'),)
     id: Mapped[str] = mapped_column(String(128),primary_key=True)
     tenant_id: Mapped[str] = mapped_column(String(128))
     ticket_id: Mapped[str] = mapped_column(ForeignKey('tickets.id'))
@@ -282,3 +285,20 @@ class EvalRun(Base):
     status: Mapped[str] = mapped_column(String(16))
     summary: Mapped[dict[str,Any]] = mapped_column(JSON)
     cases: Mapped[list[dict[str,Any]]] = mapped_column(JSON)
+
+
+class ApprovalDispatch(Base):
+    """Encrypted, durable single-action human consent handoff; never agent-readable."""
+    __tablename__='approval_dispatches'
+    __table_args__=(Index('ix_dispatch_queue','status','next_attempt_at','lease_until'),)
+    proposal_id: Mapped[str] = mapped_column(ForeignKey('proposals.id'),primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(128))
+    token_ciphertext: Mapped[str] = mapped_column(String(32768))
+    idempotency_key: Mapped[str] = mapped_column(String(128),unique=True)
+    status: Mapped[str] = mapped_column(String(16))
+    reason: Mapped[str] = mapped_column(String(64))
+    operation_id: Mapped[str | None] = mapped_column(String(128),nullable=True)
+    created_at: Mapped[int] = mapped_column(BigInteger)
+    next_attempt_at: Mapped[int] = mapped_column(BigInteger)
+    lease_owner: Mapped[str | None] = mapped_column(String(128),nullable=True)
+    lease_until: Mapped[int | None] = mapped_column(BigInteger,nullable=True)

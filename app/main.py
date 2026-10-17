@@ -1,6 +1,10 @@
 """Production v1 gateway entrypoint; no legacy credential routes are mounted."""
 from contextlib import asynccontextmanager
 import time
+import asyncio
+import os
+import logging
+from contextlib import suppress
 from typing import Any, AsyncIterator
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -10,6 +14,7 @@ from app.adapters.payments import DatabasePaymentAdapter, ResourceAdapter
 from app.intake.api import router as intake_router
 from app.agent.api import router as agent_router
 from app.api.eval_runs import router as eval_router
+from app.api.console import router as console_router
 from app.api.receipts import router as receipts_router
 from app.core.receipts import load_receipt_key
 from app.api.gateway import Gateway
@@ -38,9 +43,25 @@ def create_app(settings: GatewaySettings | None = None, *, adapter: ResourceAdap
         remote=ExecutorClient(config.executor_url,config.executor_token) if config.executor_url and config.executor_token else None
         app.state.gateway = Gateway(engine,config,policy,adapter or remote or DatabasePaymentAdapter(),orchestrator or RefundOrchestrator())
         app.state.gateway.executor=remote
+        task=None
+        if os.environ.get('DISPATCH_KEY_FILE'):
+            from app.core.dispatch import load_dispatch_cipher, dispatch_pending
+            load_dispatch_cipher()
+            async def deliver_approvals() -> None:
+                while True:
+                    try:
+                        await run_in_threadpool(dispatch_pending,app.state.gateway)
+                    except Exception:
+                        logging.error('Approval dispatcher unavailable; encrypted handoffs remain queued')
+                    await asyncio.sleep(2)
+            task=asyncio.create_task(deliver_approvals())
         try:
             yield
         finally:
+            if task:
+                task.cancel()
+                with suppress(asyncio.CancelledError):
+                    await task
             if remote:
                 remote.client.close()
             engine.dispose()
@@ -49,6 +70,7 @@ def create_app(settings: GatewaySettings | None = None, *, adapter: ResourceAdap
 
     app.include_router(receipts_router)
     app.include_router(eval_router)
+    app.include_router(console_router)
     app.include_router(intake_router)
     app.include_router(agent_router)
 
@@ -100,7 +122,7 @@ def create_app(settings: GatewaySettings | None = None, *, adapter: ResourceAdap
                 assert proposal_id is not None
                 if operation == 'preview':
                     return gateway.preview(request,raw,proposal_id)
-                return gateway.approve(request,raw,proposal_id,data)
+                return gateway.approve(request,raw,proposal_id,data,deliver=operation=='approve_dispatch')
             result = await run_in_threadpool(handle)
             cookie_token = result.pop('_cookie_token',None)
             cookie_max_age = result.pop('_cookie_max_age',None)
@@ -149,6 +171,11 @@ def create_app(settings: GatewaySettings | None = None, *, adapter: ResourceAdap
     async def approve(request: Request, proposal_id: str) -> JSONResponse:
         """Require a human session and CSRF; never take a client action digest."""
         return await dispatch(request,'approve',proposal_id)
+
+    @app.post('/v1/proposals/{proposal_id}/approve-and-execute')
+    async def approve_dispatch(request: Request, proposal_id: str) -> JSONResponse:
+        """Record explicit human consent and atomically enqueue the exact encrypted grant."""
+        return await dispatch(request,'approve_dispatch',proposal_id)
 
     @app.post('/v1/execute')
     async def execute(request: Request) -> JSONResponse:

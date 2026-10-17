@@ -15,11 +15,14 @@ services:
       RECEIPT_PRIVATE_KEY_FILE: ${RECEIPT_PRIVATE_KEY_FILE:-}
       RECEIPT_PRIVATE_KEY_PASSWORD: ${RECEIPT_PRIVATE_KEY_PASSWORD:-}
       INTAKE_RATE_SECRET: ${INTAKE_RATE_SECRET:-}
+      SESSION_CSRF_SECRET: ${SESSION_CSRF_SECRET:-}
+      DISPATCH_KEY_FILE: ${DISPATCH_KEY_FILE:+/run/secrets/dispatch.key}
     ports:
     - 127.0.0.1:8000:8000
     volumes:
     - ledger:/data
     - ./policies:/app/policies:ro
+    - ${DISPATCH_KEY_FILE:-/dev/null}:/run/secrets/dispatch.key:ro
     security_opt:
     - no-new-privileges:true
     cap_drop:

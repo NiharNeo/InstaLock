@@ -1,25 +1,5 @@
-import React, {useRef, useState} from 'react';
+import React from 'react';
 import {createRoot} from 'react-dom/client';
-import './style.css';
-import {Support} from './Support';
-type Effect = {payment_id:string;order_id:string;amount_paise:number;currency:string;destination:string;original_payment_destination:string;order_version:number;remaining_refundable_paise:number};
-type Preview = {proposal_id:string;action_digest:string;policy_version:string;preview:Effect};
-/** Human consent console: live previews, HttpOnly session cookies, and explicit CSRF approval. */
-function App(){
- const [session,setSession]=useState('');const [csrf,setCsrf]=useState('');const [connected,setConnected]=useState(false);
- const [proposal,setProposal]=useState('');const [preview,setPreview]=useState<Preview|null>(null);const [approval,setApproval]=useState<Record<string,unknown>|null>(null);
- const [error,setError]=useState('');const [busy,setBusy]=useState(false);const epoch=useRef(0);
- async function request(path:string,method='GET',body?:unknown):Promise<Record<string,unknown>>{
-  const started=epoch.current;setBusy(true);setError('');
-  try{const response=await fetch('/v1/'+path,{method,credentials:'same-origin',headers:{...(body===undefined?{}:{'Content-Type':'application/json'}),...(method==='GET'?{}:{'X-CSRF-Token':csrf})},body:body===undefined?undefined:JSON.stringify(body)});const result:Record<string,unknown>=await response.json();if(started!==epoch.current)throw new Error('Session changed');if(!response.ok)throw new Error(`${String(result.reason)} · ${String(result.rule_id)}`);return result;}
-  catch(e){setError(e instanceof Error?e.message:'Request failed');throw e;}finally{setBusy(false);}
- }
- async function login(){try{await request('session','POST',{session_token:session,csrf_token:csrf});setSession('');setConnected(true);}catch{setConnected(false);}}
- async function logout(){try{await request('session','DELETE');epoch.current++;setConnected(false);setCsrf('');setPreview(null);setApproval(null);}catch{/* Keep the session visible if revocation failed. */}}
- async function load(){setPreview(null);setApproval(null);try{setPreview(await request('proposals/'+encodeURIComponent(proposal)+'/preview') as unknown as Preview);}catch{/* Error is shown below. */}}
- async function approve(){if(!preview)return;try{setApproval(await request('proposals/'+encodeURIComponent(preview.proposal_id)+'/approve','POST',{}));setPreview(null);}catch{setPreview(null);}}
- return <main><header><a href="/" className="brand">◈ IntentLock</a><span className="badge">AUTHORIZATION GATEWAY</span></header><section className="intro"><div className="eyebrow">HUMAN INTENT. ENFORCED.</div><h1>Every action.<br/>Explicit authority.</h1><p>Review a live payment effect before authorizing one exact refund. Customer content never grants permission.</p></section>
- {!connected?<section className="connect"><label>Provisioned operator session<input disabled={busy} type="password" autoComplete="off" value={session} onChange={e=>setSession(e.target.value)}/></label><label>Session CSRF token<input disabled={busy} type="password" autoComplete="off" value={csrf} onChange={e=>setCsrf(e.target.value)}/></label><button disabled={busy||!session||!csrf} onClick={()=>void login()}>Connect ↗</button></section>:<section className="connect"><label>Proposal ID<input disabled={busy} value={proposal} onChange={e=>{setProposal(e.target.value);setPreview(null);setApproval(null);}}/></label><button disabled={busy||!proposal} onClick={()=>void load()}>Load live preview ↗</button><button className="secondary" disabled={busy} onClick={()=>void logout()}>Revoke session</button></section>}
- {error&&<p className="error" role="alert">{error}</p>}<div className="columns"><section className="panel"><div className="panel-title"><h2>Trusted payment effect</h2><span>LIVE RESOURCE</span></div>{!preview?<div className="empty">{connected?'Load a proposal to inspect the current payment.':'Authenticate to load real payment data.'}</div>:<><article>{Object.entries(preview.preview).map(([key,value])=><div className="field" key={key}><span>{key}</span><code>{String(value)}</code></div>)}</article><div className="field"><span>Action digest</span><code>{preview.action_digest}</code></div><div className="field"><span>Policy version</span><code>{preview.policy_version}</code></div><p>Approval rechecks this live state. The grant permits this exact action once.</p><button disabled={busy} onClick={()=>void approve()}>Approve this exact refund ↗</button></>}</section><section className="panel"><div className="panel-title"><h2>Consent result</h2><span>SINGLE USE</span></div>{approval?<><p>Consent issued. Return the grant to the submitting service for execution.</p><pre>{JSON.stringify(approval,null,2)}</pre></>:<div className="empty">No approval issued in this session.</div>}<div className="note">All payment values come from the gateway. The browser holds no signing key or agent service key. Session credentials stay out of local storage.</div></section></div><footer>Default deny · Human consent · Atomic execution</footer></main>;
-}
-createRoot(document.getElementById('root')!).render(<React.StrictMode>{window.location.pathname==='/support'?<Support/>:<App/>}</React.StrictMode>);
+import {Workspace} from '../../stitch_intentlock_operator_console/operator_live/Workspace';
+/** The runtime mounts the user-selected Stitch workspace, without a second design implementation. */
+createRoot(document.getElementById('root')!).render(<React.StrictMode><Workspace/></React.StrictMode>);

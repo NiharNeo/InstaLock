@@ -626,7 +626,7 @@ model adapter has been removed. The worker submits typed proposals to `/v1/propo
 model API or Postgres call was performed during testing. Docker startup remains
 unverified because Engine is unavailable in this environment.
 
-Verified in this workspace: **524 pytest cases passed**, including 106 v1
+Verified in this workspace: **541 pytest cases passed**, including 106 v1
 policy/workflow/authentication tests, plus TypeScript/Vite production build and
 Alembic metadata/Compose configuration checks. The updated console was visually
 checked with honest empty states. Docker Engine and live external payment/model
@@ -646,3 +646,69 @@ they do not establish production latency. Run the live evaluation described in
 `tools/eval/README.md` with real test-mode credentials and captured grants before
 claiming deployment throughput or latency. Signing and receipt writes remain
 mandatory on the decision path.
+
+## Low-intervention Stitch operator workspace
+
+The main React/TypeScript workspace now lives in
+`stitch_intentlock_operator_console/operator_live/Workspace.tsx`. The Vite runtime
+mounts that source; the support and Metrics screens also come from Stitch.
+The console lists the latest 50 tenant-scoped tickets, proposals and operations,
+recent recorded model outcomes, support links and signed receipt inspection.
+Refresh runs every eight seconds while the authenticated workspace is visible.
+With a dedicated `SESSION_CSRF_SECRET` (32+ characters) in the gateway environment,
+an existing HttpOnly session resumes automatically after a page reload.
+`GET /v1/session` authenticates the cookie, enforces same-origin checks and returns
+a stable session-bound HMAC CSRF token to the UI. The token stays only in memory;
+POST requests still require it. A different session’s token cannot authorize a
+write. Deployments without this secret retain explicit CSRF entry. No browser
+storage or public login shortcut is used. Production identity-provider integration remains deployment work.
+
+An operator selects a proposal, reads its live preview, then clicks **Approve and
+refund**. `POST /v1/proposals/{id}/approve-and-execute` accepts an empty body and
+requires the same human session, CSRF, live policy checks and matching preview as
+ordinary approval. It writes the human grant, signed receipt and encrypted
+`approval_dispatches` handoff in the same transaction. It does not expose the
+bearer grant to the browser. Repeated approval submissions return the existing
+handoff rather than minting another grant. The original `/approve` endpoint
+remains available for external submitting services and live eval captures.
+
+Generate and retain a dedicated dispatch encryption key:
+
+```sh
+.venv/bin/python -m app.core.dispatch /absolute/protected/path/dispatch.key
+export DISPATCH_KEY_FILE=/absolute/protected/path/dispatch.key
+.venv/bin/alembic upgrade head
+```
+
+The file must be regular, non-symlink, mode 0600/0400. Back it up alongside the
+ledger; losing it prevents delivery of queued consent. Keep it out of agent and
+executor environments. In Compose, set the host absolute `DISPATCH_KEY_FILE`;
+only gateway mounts it at `/run/secrets/dispatch.key`. Ensure its owner is readable
+by container UID 10001 while preserving mode 0600/0400. Blank configuration keeps
+the dispatcher disabled and the combined endpoint denies before issuing consent.
+
+The gateway dispatcher polls every two seconds and leases each encrypted handoff.
+It never issues grants: it submits the already human-signed token, stored action,
+submitting service identity and immutable idempotency key to the trusted executor.
+A lost reply retains the ciphertext and retries the identical request. Successful
+handoff deletes its ciphertext; expired or rejected consent cannot become a new
+grant. Encrypted-token corruption fails closed with a signed
+`DISPATCH_DECRYPT_FAILED` receipt. The trusted executor continues to verify every
+signature, tenant, digest, resource version and policy before execution.
+
+Run the existing isolated agent continuously to process newly queued tickets and
+the executor reconciler continuously to resolve provider-pending operations:
+
+```sh
+# Agent-only environment: GATEWAY_URL, AGENT_SERVICE_KEY, GEMINI_MODEL, GEMINI_API_KEY.
+.venv/bin/python -m app.agent.worker
+# Separate trusted executor-only environment, as documented above.
+.venv/bin/python -m app.executor.reconcile
+```
+
+The single required financial decision is human approval of the exact live
+refund. No model can authorize one. Provider rejects, stale resources, missing
+links, invalid model output and unavailable credentials remain explicit failures
+requiring investigation; no amounts, permissions or grants are silently changed.
+The Metrics page still requires real live evaluation runs; one successful demo
+refund is not a completed benchmark suite.
